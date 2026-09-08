@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Film, 
@@ -275,10 +276,13 @@ export default function ScenePlaceholder({
                     
                     {/* Left Column: Visual Artwork Frame */}
                     <div className="lg:col-span-6 relative group rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl aspect-video bg-[#14141C]">
-                      <img
+                      <Image
                         src={DEFAULT_IMAGES[activeSceneIdx % DEFAULT_IMAGES.length]}
                         alt={currentScene.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        priority={activeSceneIdx === 0}
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D11] via-transparent to-black/30" />
 

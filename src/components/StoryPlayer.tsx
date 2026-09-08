@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HistoricalScene } from '@/types/story';
-import { Film, Sparkles, RefreshCw, Clock, MessageCircle, ChevronLeft, ChevronRight, Play, Pause, Volume2, Radio, Wand2 } from 'lucide-react';
+import { Film, RefreshCw, MessageCircle, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
 interface StoryPlayerProps {
   currentLang: 'EN' | 'HI';

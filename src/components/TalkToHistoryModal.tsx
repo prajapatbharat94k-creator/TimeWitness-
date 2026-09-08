@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, Mic, Volume2, Send, Shield, RefreshCw } from 'lucide-react';
 
@@ -236,9 +237,11 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                             : 'bg-[#0D0D11]/60 border border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/40 hover:text-[#F8FAFC]'
                         }`}
                       >
-                        <img
+                        <Image
                           src={fig.avatar}
                           alt={name}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]/40 shrink-0"
                         />
                         <div className="overflow-hidden">
@@ -265,9 +268,11 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
               <div className="flex items-center justify-between pb-4 border-b border-[#242434]">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <img
+                    <Image
                       src={selectedFigure.avatar}
                       alt={selectedFigure.nameEn}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]"
                     />
                     <span className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0D0D11] absolute bottom-0 right-0" />
