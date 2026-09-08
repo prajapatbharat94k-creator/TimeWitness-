@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Sparkles, X, History, Compass, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -68,6 +68,14 @@ export default function SearchBar({ currentLang, onSearch, activeQuery }: Search
   const [inputVal, setInputVal] = useState(activeQuery || '');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeQuery) {
+      setInputVal(activeQuery);
+      const matchingTag = SAMPLE_TAGS.find(t => t.query === activeQuery);
+      setSelectedTagId(matchingTag ? matchingTag.id : null);
+    }
+  }, [activeQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -69,6 +69,9 @@ function generateFallbackScenes(topic: string, language: string): HistoricalScen
 }
 
 export async function POST(req: Request) {
+  let requestedTopic = 'Historical Event';
+  let requestedLanguage = 'EN';
+
   try {
     const body = await req.json();
     const { topic, language = 'EN' } = body;
@@ -80,11 +83,14 @@ export async function POST(req: Request) {
       );
     }
 
+    requestedTopic = topic;
+    requestedLanguage = language;
+
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       console.warn('GEMINI_API_KEY environment variable is missing. Returning structured fallback scenes.');
-      const fallbackData = generateFallbackScenes(topic, language);
+      const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
       return NextResponse.json({ scenes: fallbackData, source: 'fallback' });
     }
 
@@ -92,8 +98,8 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `You are a world-class historical narrative engine for TimeWitness.
-Generate a structured 5-scene historical journey for the topic: "${topic}".
-Language requested for narration: ${language === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
+Generate a structured 5-scene historical journey for the topic: "${requestedTopic}".
+Language requested for narration: ${requestedLanguage === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
 
 Structure the journey into exactly 5 sequential historical scenes:
 Scene 1: Origin / Early Life
@@ -102,7 +108,7 @@ Scene 3: Defining Climax / Turning Point
 Scene 4: Victory / Major Triumph
 Scene 5: Legacy / Historical Impact
 
-Use dramatic second-person storytelling ("You stand...", "You witness...") in the narration field in the requested language (${language}).
+Use dramatic second-person storytelling ("You stand...", "You witness...") in the narration field in the requested language (${requestedLanguage}).
 
 Ensure strict JSON output conforming to the schema.`;
 
@@ -145,8 +151,7 @@ Ensure strict JSON output conforming to the schema.`;
     console.error('Error generating historical story with Gemini API:', error);
     
     // Graceful fallback if API call fails
-    const reqBody = await req.json().catch(() => ({ topic: 'Historical Event', language: 'EN' }));
-    const fallbackData = generateFallbackScenes(reqBody.topic || 'Historical Event', reqBody.language || 'EN');
+    const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
 
     return NextResponse.json({ 
       scenes: fallbackData, 
