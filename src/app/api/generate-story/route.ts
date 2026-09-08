@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { HistoricalScene } from '@/types/story';
+import { findDemoStory } from '@/data/sampleStories';
 
-export interface HistoricalScene {
-  sceneNumber: number;
-  era: string;
-  title: string;
-  narration: string;
-  imagePrompt: string;
-  ambientTag: string;
-}
+// Re-export for convenience (used in page.tsx imports)
+export type { HistoricalScene };
 
-// Fallback generator if API key is not provided or API call fails
+// Fallback generator if API key is missing or API call fails
 function generateFallbackScenes(topic: string, language: string): HistoricalScene[] {
   const isHindi = language === 'HI' || language === 'Hindi' || /[\u0900-\u097F]/.test(topic);
 
@@ -69,28 +65,45 @@ function generateFallbackScenes(topic: string, language: string): HistoricalScen
 }
 
 export async function POST(req: Request) {
-  let requestedTopic = 'Historical Event';
-  let requestedLanguage = 'EN';
+  let topic = 'Historical Event';
+  let language = 'EN';
 
   try {
-    const body = await req.json();
-    const { topic, language = 'EN' } = body;
+    const body = await req.json().catch(() => ({}));
+    if (body.topic && typeof body.topic === 'string') {
+      topic = body.topic.trim();
+    }
+    if (body.language && typeof body.language === 'string') {
+      language = body.language.trim();
+    }
 
-    if (!topic || typeof topic !== 'string') {
+    if (!topic) {
       return NextResponse.json(
         { error: 'Topic string is required in request body.' },
         { status: 400 }
       );
     }
 
-    requestedTopic = topic;
-    requestedLanguage = language;
+    // ── Demo story fast-path: check curated dataset before hitting API ──────
+    const demoStory = findDemoStory(topic);
+    if (demoStory) {
+      // For instant demo mode we serve the curated data immediately when
+      // there is no API key, or if language is EN
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return NextResponse.json({
+          scenes: demoStory.scenes,
+          source: 'demo',
+          warning: 'Using curated demo story — no API key configured.',
+        });
+      }
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       console.warn('GEMINI_API_KEY environment variable is missing. Returning structured fallback scenes.');
-      const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
+      const fallbackData = generateFallbackScenes(topic, language);
       return NextResponse.json({ scenes: fallbackData, source: 'fallback' });
     }
 
@@ -98,8 +111,8 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `You are a world-class historical narrative engine for TimeWitness.
-Generate a structured 5-scene historical journey for the topic: "${requestedTopic}".
-Language requested for narration: ${requestedLanguage === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
+Generate a structured 5-scene historical journey for the topic: "${topic}".
+Language requested for narration: ${language === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
 
 Structure the journey into exactly 5 sequential historical scenes:
 Scene 1: Origin / Early Life
@@ -108,7 +121,7 @@ Scene 3: Defining Climax / Turning Point
 Scene 4: Victory / Major Triumph
 Scene 5: Legacy / Historical Impact
 
-Use dramatic second-person storytelling ("You stand...", "You witness...") in the narration field in the requested language (${requestedLanguage}).
+Use dramatic second-person storytelling ("You stand...", "You witness...") in the narration field in the requested language (${language}).
 
 Ensure strict JSON output conforming to the schema.`;
 
@@ -129,7 +142,12 @@ Ensure strict JSON output conforming to the schema.`;
       },
     };
 
-    const response = await ai.models.generateContent({
+    // ── 8-second timeout wrapper ─────────────────────────────────────────────
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 8000)
+    );
+
+    const apiCallPromise = ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
@@ -138,6 +156,8 @@ Ensure strict JSON output conforming to the schema.`;
         temperature: 0.7,
       },
     });
+
+    const response = await Promise.race([apiCallPromise, timeoutPromise]);
 
     const responseText = response.text;
     if (!responseText) {
@@ -149,14 +169,25 @@ Ensure strict JSON output conforming to the schema.`;
     return NextResponse.json({ scenes, source: 'gemini-api' });
   } catch (error: any) {
     console.error('Error generating historical story with Gemini API:', error);
-    
-    // Graceful fallback if API call fails
-    const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
 
-    return NextResponse.json({ 
-      scenes: fallbackData, 
-      source: 'fallback', 
-      warning: 'API invocation failed, returned structured fallback data.' 
+    // ── On timeout or rate-limit: try demo story first ──────────────────────
+    const demoStory = findDemoStory(topic);
+    if (demoStory) {
+      return NextResponse.json({
+        scenes: demoStory.scenes,
+        source: 'demo',
+        warning: error?.message === 'GEMINI_TIMEOUT'
+          ? 'API response exceeded 8s — showing curated demo story.'
+          : 'API unavailable — showing curated demo story.',
+      });
+    }
+
+    // ── Generic fallback ─────────────────────────────────────────────────────
+    const fallbackData = generateFallbackScenes(topic, language);
+    return NextResponse.json({
+      scenes: fallbackData,
+      source: 'fallback',
+      warning: 'API invocation failed, returned structured fallback data.',
     });
   }
 }
