@@ -37,7 +37,7 @@ export default function Navbar({ currentLang, onLanguageChange, onOpenTalkToHist
 
         {/* Quick Nav Links — hidden on mobile */}
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
-          <a href="#hero" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
+          <a href="#eras" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
             <Compass className="w-4 h-4 text-[#D4AF37]" />
             <span>{currentLang === 'EN' ? 'Explore Eras' : 'युग खोजें'}</span>
           </a>

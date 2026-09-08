@@ -169,7 +169,7 @@ function AppInner() {
         />
 
         {/* Featured Historical Eras Showcase Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 border-t border-[#242434] relative">
+        <section id="eras" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 border-t border-[#242434] relative">
           <div className="text-center mb-12 sm:mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] flex items-center justify-center gap-1.5 mb-3">
               <Landmark className="w-4 h-4 text-[#D4AF37]" />

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -62,6 +63,28 @@ const HISTORICAL_FIGURES: Figure[] = [
     greetingEn: 'Welcome to Alexandria. Step forward into the hall of Ptolemies and speak.',
     greetingHi: 'अलेक्जेंड्रिया में आपका स्वागत है। टोलमी के दरबार में आगे आएं और अपनी बात रखें।',
   },
+  {
+    id: 'gandhi',
+    nameEn: 'Mahatma Gandhi',
+    nameHi: 'महात्मा गांधी',
+    titleEn: 'Father of the Nation & Apostle of Non-Violence',
+    titleHi: 'राष्ट्रपिता एवं अहिंसा के अग्रदूत',
+    era: '1869 – 1948 AD',
+    avatar: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop',
+    greetingEn: 'Namaste, my friend. Truth and non-violence are my guideposts. What thoughts wish you to share today?',
+    greetingHi: 'नमस्ते मेरे मित्र। सत्य और अहिंसा ही मेरा मार्ग हैं। आज आप किस विषय पर विचार-विमर्श करना चाहते हैं?',
+  },
+  {
+    id: 'armstrong',
+    nameEn: 'Neil Armstrong',
+    nameHi: 'नील आर्मस्ट्रांग',
+    titleEn: 'Apollo 11 Commander & Lunar Explorer',
+    titleHi: 'अपोलो ११ कमांडर एवं चंद्रमा अन्वेषक',
+    era: '1930 – 2012 AD',
+    avatar: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=200&auto=format&fit=crop',
+    greetingEn: 'Tranquility Base here. The Eagle has landed. What coordinates of the lunar voyage would you like to explore?',
+    greetingHi: 'ट्रैंक्विलिटी बेस से संदेश। द ईगल उतर चुका है। चंद्र यात्रा के किस पहलू पर आप बात करना चाहते हैं?',
+  },
 ];
 
 const matchHistoricalFigure = (query?: string): Figure => {
@@ -78,6 +101,12 @@ const matchHistoricalFigure = (query?: string): Figure => {
   }
   if (q.includes('cleopatra') || q.includes('egypt') || q.includes('alexandria') || q.includes('pharaoh')) {
     return HISTORICAL_FIGURES[3];
+  }
+  if (q.includes('gandhi') || q.includes('dandi') || q.includes('salt') || q.includes('satyagraha')) {
+    return HISTORICAL_FIGURES[4];
+  }
+  if (q.includes('apollo') || q.includes('armstrong') || q.includes('moon') || q.includes('lunar') || q.includes('space')) {
+    return HISTORICAL_FIGURES[5];
   }
   return HISTORICAL_FIGURES[0];
 };
@@ -130,62 +159,155 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
     }
   };
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const getFallbackReply = (userMsg: string) => {
+    if (selectedFigure.id === 'shivaji') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": Freedom and Swarajya are built upon righteousness, naval vigilance, and fortifying the motherland for future generations.`
+        : `"${userMsg}" के संदर्भ में: स्वराज्य की नींव धर्म, नौसेना की सतर्कता और भावी पीढ़ियों के लिए मातृभूमि को सशक्त बनाने पर टिकी है।`;
+    } else if (selectedFigure.id === 'lakshmibai') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": We shall fight till our last breath! Bravery and unity will always shatter imperial tyranny.`
+        : `"${userMsg}" के संदर्भ में: हम अंतिम सांस तक लड़ेंगे! मातृभूमि के स्वाभिमान की रक्षा में भय का कोई स्थान नहीं।`;
+    } else if (selectedFigure.id === 'napoleon') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": Victory belongs to the most persevering. Discipline, timing, and bold maneuver decide the destiny of empires.`
+        : `"${userMsg}" के संदर्भ में: विजय उसी की होती है जो सबसे अधिक दृढ़ रहता है। अनुशासन और सही समय ही साम्राज्य का भाग्य तय करते हैं।`;
+    } else if (selectedFigure.id === 'cleopatra') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": True sovereign power is governed by intellect, diplomatic mastery, and navigating alliances with unwavering poise.`
+        : `"${userMsg}" के संदर्भ में: संप्रभु सत्ता केवल सेनाओं से नहीं, बल्कि कूटनीति, तीक्ष्ण बुद्धि और गरिमापूर्ण संकल्प से चलाई जाती है।`;
+    } else if (selectedFigure.id === 'gandhi') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": In a gentle way, you can shake the world. Truth alone triumphs, and persistent non-violence conquers hatred.`
+        : `"${userMsg}" के संदर्भ में: विनम्रता से आप संपूर्ण विश्व को हिला सकते हैं। सत्य की ही विजय होती है और अहिंसा ही स्थायी परिवर्तन लाती है।`;
+    } else if (selectedFigure.id === 'armstrong') {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": That's one small step for man, one giant leap for mankind. Curiosity and collective human perseverance conquered the frontier.`
+        : `"${userMsg}" के संदर्भ में: यह मनुष्य का एक छोटा सा कदम है, लेकिन मानवजाति के लिए एक विशाल छलांग है। विज्ञान और अटूट संकल्प ही नई सीमाओं को जीतते हैं।`;
+    } else {
+      return currentLang === 'EN'
+        ? `Regarding "${userMsg}": History is written by those who dare to forge their own fate.`
+        : `"${userMsg}" के संदर्भ में: इतिहास वही रचते हैं जो अपने भाग्य का निर्माण स्वयं करते हैं।`;
+    }
+  };
+
+  const toggleRecording = () => {
+    if (typeof window === 'undefined') return;
+
+    interface SpeechEvent {
+      results: Array<Array<{ transcript: string }>>;
+    }
+
+    const win = window as unknown as {
+      SpeechRecognition?: new () => {
+        lang: string;
+        continuous: boolean;
+        interimResults: boolean;
+        onstart: (() => void) | null;
+        onresult: ((event: SpeechEvent) => void) | null;
+        onerror: (() => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+      webkitSpeechRecognition?: new () => {
+        lang: string;
+        continuous: boolean;
+        interimResults: boolean;
+        onstart: (() => void) | null;
+        onresult: ((event: SpeechEvent) => void) | null;
+        onerror: (() => void) | null;
+        onend: (() => void) | null;
+        start: () => void;
+      };
+    };
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Please use keyboard input.');
+      return;
+    }
+
+    if (isRecording) {
+      setIsRecording(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => setIsRecording(true);
+      recognition.onresult = (event: SpeechEvent) => {
+        const transcript = event.results?.[0]?.[0]?.transcript || '';
+        setInputText(transcript);
+        setIsRecording(false);
+      };
+      recognition.onerror = () => setIsRecording(false);
+      recognition.onend = () => setIsRecording(false);
+
+      recognition.start();
+    } catch (e) {
+      console.error('Speech recognition failed to start:', e);
+      setIsRecording(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
     const userMsg = inputText.trim();
     setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
     setInputText('');
-
     setIsLoading(true);
-    setTimeout(() => {
-      let reply = '';
-      const lowerMsg = userMsg.toLowerCase();
-      if (lowerMsg.includes('fort') || lowerMsg.includes('battle') || lowerMsg.includes('war') || lowerMsg.includes('युद्ध') || lowerMsg.includes('किला')) {
-        reply = currentLang === 'EN'
-          ? `Regarding "${userMsg}": Freedom and Swarajya are built upon righteousness, naval vigilance, and fortifying the motherland for future generations.`
-          : `"${userMsg}" के संदर्भ में: स्वराज्य की नींव धर्म, नौसेना की सतर्कता और भावी पीढ़ियों के लिए मातृभूमि को सशक्त बनाने पर टिकी है।`;
-      } else if (selectedFigure.id === 'lakshmibai') {
-        reply = currentLang === 'EN'
-          ? `Regarding "${userMsg}": We shall fight till our last breath! Bravery and unity will always shatter imperial tyranny.`
-          : `"${userMsg}" के संदर्भ में: हम अंतिम सांस तक लड़ेंगे! मातृभूमि के स्वाभिमान की रक्षा में भय का कोई स्थान नहीं।`;
-      } else if (selectedFigure.id === 'napoleon') {
-        reply = currentLang === 'EN'
-          ? `Regarding "${userMsg}": Victory belongs to the most persevering. Discipline, timing, and bold maneuver decide the destiny of empires.`
-          : `"${userMsg}" के संदर्भ में: विजय उसी की होती है जो सबसे अधिक दृढ़ रहता है। अनुशासन और सही समय ही साम्राज्य का भाग्य तय करते हैं।`;
-      } else if (selectedFigure.id === 'cleopatra') {
-        reply = currentLang === 'EN'
-          ? `Regarding "${userMsg}": True sovereign power is governed by intellect, diplomatic mastery, and navigating alliances with unwavering poise.`
-          : `"${userMsg}" के संदर्भ में: संप्रभु सत्ता केवल सेनाओं से नहीं, बल्कि कूटनीति, तीक्ष्ण बुद्धि और गरिमापूर्ण संकल्प से चलाई जाती है।`;
-      } else {
-        reply = currentLang === 'EN'
-          ? `Regarding "${userMsg}": History is written by those who dare to forge their own fate.`
-          : `"${userMsg}" के संदर्भ में: इतिहास वही रचते हैं जो अपने भाग्य का निर्माण स्वयं करते हैं।`;
+
+    try {
+      const res = await fetch('/api/talk-to-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          figureId: selectedFigure.id,
+          figureName: currentLang === 'EN' ? selectedFigure.nameEn : selectedFigure.nameHi,
+          message: userMsg,
+          language: currentLang,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('API request failed');
       }
+
+      const data = await res.json();
+      const reply = data.reply || getFallbackReply(userMsg);
       setMessages(prev => [...prev, { sender: 'figure', text: reply }]);
       setIsLoading(false);
       playVoice(reply);
-    }, 600);
+    } catch {
+      const reply = getFallbackReply(userMsg);
+      setMessages(prev => [...prev, { sender: 'figure', text: reply }]);
+      setIsLoading(false);
+      playVoice(reply);
+    }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
-          
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-4xl bg-[#0D0D11] border border-[#D4AF37]/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[85vh] max-h-[700px]"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-5xl h-[90vh] max-h-[700px] rounded-3xl bg-[#0D0D11] border border-[#D4AF37]/40 shadow-2xl overflow-hidden flex flex-col md:flex-row relative"
           >
-            
-            {/* Left Column: Historical Figures Selector */}
-            <div className="w-full md:w-80 bg-[#14141C] border-b md:border-b-0 md:border-r border-[#242434] p-4 flex flex-col justify-between shrink-0">
+            {/* Left Column: Personality Switcher Panel */}
+            <div className="w-full md:w-80 bg-[#14141C] p-4 md:p-6 border-b md:border-b-0 md:border-r border-[#242434] flex flex-col justify-between shrink-0">
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-[#D4AF37]" />
-                    <span className="font-cinzel text-base font-bold text-[#F8FAFC]">
+                    <span className="font-cinzel text-lg font-bold text-[#F8FAFC]">
                       {currentLang === 'EN' ? 'Talk to History' : 'इतिहास संवाद'}
                     </span>
                   </div>
@@ -205,9 +327,8 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                       key={i}
                       onClick={() => {
                         setInputText(q);
-                        handleSend();
                       }}
-                      className="px-3 py-1 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-medium text-[#D4AF37] hover:bg-[#D4AF37]/30"
+                      className="px-3 py-1 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-medium text-[#D4AF37] hover:bg-[#D4AF37]/30 text-left"
                     >
                       {q}
                     </button>
@@ -225,6 +346,9 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                       <button
                         key={fig.id}
                         onClick={() => {
+                          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                          }
                           setSelectedFigure(fig);
                           setMessages([{
                             sender: 'figure',
@@ -295,17 +419,6 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
 
               {/* Chat Messages Feed */}
               <div className="flex-1 overflow-y-auto py-4 space-y-4 my-2 pr-2">
-                {/* Loading Indicator */}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] p-3.5 rounded-2xl glass-panel border border-[#D4AF37]/30">
-                      <div className="flex items-center gap-2 text-[#D4AF37]">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 {messages.map((msg, idx) => (
                   <motion.div
                     key={idx}
@@ -328,23 +441,37 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                         </div>
                       )}
                       <p>{msg.text}</p>
-
                     </div>
                   </motion.div>
                 ))}
+
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] p-3.5 rounded-2xl glass-panel border border-[#D4AF37]/30">
+                      <div className="flex items-center gap-2 text-[#D4AF37]">
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span className="text-sm font-mono animate-pulse">
+                          {currentLang === 'EN'
+                            ? `${selectedFigure.nameEn.split(' ')[0]} is consulting memoirs...`
+                            : `${selectedFigure.nameHi} विचारमंथन कर रहे हैं...`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Bottom Input Field */}
               <div className="pt-2 border-t border-[#242434]">
                 <div className="flex items-center gap-2 bg-[#14141C] p-2 rounded-2xl border border-[#242434] focus-within:border-[#D4AF37] transition-all">
                   <button
-                    onClick={() => setIsRecording(!isRecording)}
+                    onClick={toggleRecording}
                     className={`p-2 rounded-xl transition-colors ${
                       isRecording 
                         ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' 
                         : 'text-[#64748B] hover:text-[#D4AF37]'
                     }`}
-                    title="Voice Input"
+                    title={isRecording ? 'Listening... click to stop' : 'Voice Input (Click to speak)'}
                   >
                     <Mic className="w-5 h-5" />
                   </button>
@@ -364,7 +491,8 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
 
                   <button
                     onClick={handleSend}
-                    className="p-2.5 rounded-xl bg-[#D4AF37] text-[#0D0D11] hover:bg-[#FFF3C4] font-bold transition-all shadow-gold-glow"
+                    disabled={isLoading || !inputText.trim()}
+                    className="p-2.5 rounded-xl bg-[#D4AF37] text-[#0D0D11] hover:bg-[#FFF3C4] font-bold transition-all shadow-gold-glow disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Send className="w-4 h-4" />
                   </button>
