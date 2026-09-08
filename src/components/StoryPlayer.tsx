@@ -70,7 +70,7 @@ export default function StoryPlayer({
   };
 
   return (
-    <section id="scene-viewer" className="w-full max-w-6xl mx-auto px-4 pb-20">
+    <section id="story-player" className="w-full max-w-6xl mx-auto px-4 pb-20">
       {/* Placeholder when no scenes */}
       {!isLoading && scenes.length === 0 && (
         <motion.div className="py-12 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
