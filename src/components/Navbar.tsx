@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { Hourglass, Globe, MessageSquare, ChevronDown, Compass, ScrollText, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,13 +15,29 @@ interface NavbarProps {
 
 export default function Navbar({ currentLang, onLanguageChange, onOpenTalkToHistory, isMuted, onToggleMute }: NavbarProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setIsLangOpen(false);
+      }
+    };
+
+    if (isLangOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLangOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#0D0D11]/80 border-b border-[#242434]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
         
         {/* Brand Logo */}
-        <a href="/" className="flex items-center gap-2.5 group focus:outline-none shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 group focus:outline-none shrink-0">
           <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-[#14141C] border border-[#D4AF37]/40 shadow-gold-glow group-hover:border-[#D4AF37] transition-all duration-300">
             <Hourglass className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37] animate-pulse-slow group-hover:rotate-180 transition-transform duration-700" />
             <div className="absolute inset-0 rounded-xl bg-[#D4AF37]/10 filter blur-sm group-hover:blur-md transition-all opacity-50" />
@@ -33,18 +50,18 @@ export default function Navbar({ currentLang, onLanguageChange, onOpenTalkToHist
               Historical AI Engine
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* Quick Nav Links — hidden on mobile */}
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
-          <a href="#eras" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
+          <Link href="#eras" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
             <Compass className="w-4 h-4 text-[#D4AF37]" />
             <span>{currentLang === 'EN' ? 'Explore Eras' : 'युग खोजें'}</span>
-          </a>
-          <a href="#scene-viewer" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
+          </Link>
+          <Link href="#scene-viewer" className="text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1.5 transition-colors">
             <ScrollText className="w-4 h-4 text-[#D4AF37]" />
             <span>{currentLang === 'EN' ? 'Witness Scenes' : 'दृश्य देखें'}</span>
-          </a>
+          </Link>
         </nav>
 
         {/* Action Controls */}
@@ -86,7 +103,7 @@ export default function Navbar({ currentLang, onLanguageChange, onOpenTalkToHist
           </motion.button>
 
           {/* Language Selector Dropdown */}
-          <div className="relative">
+          <div className="relative" ref={langDropdownRef}>
             <button
               onClick={() => setIsLangOpen(!isLangOpen)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-lg bg-[#14141C] border border-[#242434] hover:border-[#D4AF37]/40 text-xs sm:text-sm text-[#CBD5E1] transition-all"
