@@ -53,9 +53,32 @@ export default function ScenePlaceholder({
 
   useEffect(() => {
     setActiveSceneIdx(0);
+    setIsPlayingAudio(false);
   }, [scenes]);
 
   const currentScene = scenes[activeSceneIdx] || null;
+
+  // Real narration speech playback using Web Speech API
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      if (isPlayingAudio && currentScene) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(currentScene.narration);
+        utterance.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+        utterance.rate = 0.92;
+        utterance.onend = () => setIsPlayingAudio(false);
+        utterance.onerror = () => setIsPlayingAudio(false);
+        window.speechSynthesis.speak(utterance);
+      } else {
+        window.speechSynthesis.cancel();
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [isPlayingAudio, currentScene, currentLang]);
 
   return (
     <section id="scene-viewer" className="w-full max-w-6xl mx-auto px-4 pb-20 relative z-10">
@@ -182,7 +205,10 @@ export default function ScenePlaceholder({
                     return (
                       <button
                         key={sc.sceneNumber || idx}
-                        onClick={() => setActiveSceneIdx(idx)}
+                        onClick={() => {
+                          setActiveSceneIdx(idx);
+                          setIsPlayingAudio(false);
+                        }}
                         className={`flex-1 min-w-[110px] p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
                           isActive
                             ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#14141C] border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
@@ -257,7 +283,7 @@ export default function ScenePlaceholder({
                     {/* Dramatic Narration Text */}
                     <div className="glass-panel p-4 rounded-xl border border-[#D4AF37]/20 relative">
                       <p className="text-xs sm:text-sm text-[#E2E8F0] leading-relaxed font-sans">
-                        "{currentScene.narration}"
+                        &ldquo;{currentScene.narration}&rdquo;
                       </p>
                     </div>
 
@@ -274,7 +300,10 @@ export default function ScenePlaceholder({
                     {/* Navigation Controls */}
                     <div className="flex items-center justify-between pt-2">
                       <button
-                        onClick={() => setActiveSceneIdx(prev => Math.max(0, prev - 1))}
+                        onClick={() => {
+                          setActiveSceneIdx(prev => Math.max(0, prev - 1));
+                          setIsPlayingAudio(false);
+                        }}
                         disabled={activeSceneIdx === 0}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
                           activeSceneIdx === 0
@@ -295,7 +324,10 @@ export default function ScenePlaceholder({
                       </button>
 
                       <button
-                        onClick={() => setActiveSceneIdx(prev => Math.min(scenes.length - 1, prev + 1))}
+                        onClick={() => {
+                          setActiveSceneIdx(prev => Math.min(scenes.length - 1, prev + 1));
+                          setIsPlayingAudio(false);
+                        }}
                         disabled={activeSceneIdx === scenes.length - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
                           activeSceneIdx === scenes.length - 1

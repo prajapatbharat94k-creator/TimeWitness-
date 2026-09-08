@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, Mic, Volume2, Sparkles, Send, UserCheck, Shield } from 'lucide-react';
 
@@ -63,6 +63,24 @@ const HISTORICAL_FIGURES: Figure[] = [
   },
 ];
 
+const matchHistoricalFigure = (query?: string): Figure => {
+  if (!query) return HISTORICAL_FIGURES[0];
+  const q = query.toLowerCase();
+  if (q.includes('shivaji') || q.includes('maratha') || q.includes('raigad') || q.includes('swarajya')) {
+    return HISTORICAL_FIGURES[0];
+  }
+  if (q.includes('lakshmibai') || q.includes('jhansi') || q.includes('1857')) {
+    return HISTORICAL_FIGURES[1];
+  }
+  if (q.includes('napoleon') || q.includes('bonaparte') || q.includes('waterloo') || q.includes('french')) {
+    return HISTORICAL_FIGURES[2];
+  }
+  if (q.includes('cleopatra') || q.includes('egypt') || q.includes('alexandria') || q.includes('pharaoh')) {
+    return HISTORICAL_FIGURES[3];
+  }
+  return HISTORICAL_FIGURES[0];
+};
+
 interface TalkToHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -71,9 +89,7 @@ interface TalkToHistoryModalProps {
 }
 
 export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defaultFigure }: TalkToHistoryModalProps) {
-  const [selectedFigure, setSelectedFigure] = useState<Figure>(
-    HISTORICAL_FIGURES.find(f => f.nameEn.toLowerCase().includes((defaultFigure || '').toLowerCase())) || HISTORICAL_FIGURES[0]
-  );
+  const [selectedFigure, setSelectedFigure] = useState<Figure>(() => matchHistoricalFigure(defaultFigure));
   const [messages, setMessages] = useState<Array<{ sender: 'user' | 'figure'; text: string }>>([
     {
       sender: 'figure',
@@ -83,7 +99,36 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
 
+  useEffect(() => {
+    if (defaultFigure) {
+      const matched = matchHistoricalFigure(defaultFigure);
+      setSelectedFigure(matched);
+      setMessages([{
+        sender: 'figure',
+        text: currentLang === 'EN' ? matched.greetingEn : matched.greetingHi,
+      }]);
+    }
+  }, [defaultFigure, currentLang]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   if (!isOpen) return null;
+
+  const playVoice = (text: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -91,24 +136,33 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
     setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
     setInputText('');
 
-    // Simulate historical AI voice reply
+    // Historical AI voice reply tailored to character
     setTimeout(() => {
       let reply = '';
       if (selectedFigure.id === 'shivaji') {
         reply = currentLang === 'EN'
-          ? `Regarding '${userMsg}': Freedom and Swarajya are built upon the foundation of righteousness, naval strength, and fortifying the motherland.`
-          : `'${userMsg}' के संदर्भ में: स्वराज की नींव धर्म, नौसेना की शक्ति और मातृभूमि के संरक्षण पर टिकी है।`;
+          ? `Regarding "${userMsg}": Freedom and Swarajya are built upon righteousness, naval vigilance, and fortifying the motherland for future generations.`
+          : `"${userMsg}" के संदर्भ में: स्वराज्य की नींव धर्म, नौसेना की सतर्कता और भावी पीढ़ियों के लिए मातृभूमि को सशक्त बनाने पर टिकी है।`;
       } else if (selectedFigure.id === 'lakshmibai') {
         reply = currentLang === 'EN'
-          ? `We shall never give up Jhansi! Unity and bravery will break any foreign oppression.`
-          : `हम अपनी झांसी नहीं देंगे! एकता और वीरता हर अत्याचार को परास्त करेगी।`;
+          ? `Regarding "${userMsg}": We shall fight till our last breath! Bravery and unity will always shatter imperial tyranny.`
+          : `"${userMsg}" के संदर्भ में: हम अंतिम सांस तक लड़ेंगे! मातृभूमि के स्वाभिमान की रक्षा में भय का कोई स्थान नहीं।`;
+      } else if (selectedFigure.id === 'napoleon') {
+        reply = currentLang === 'EN'
+          ? `Regarding "${userMsg}": Victory belongs to the most persevering. Discipline, timing, and bold maneuver decide the destiny of empires.`
+          : `"${userMsg}" के संदर्भ में: विजय उसी की होती है जो सबसे अधिक दृढ़ रहता है। अनुशासन और सही समय ही साम्राज्य का भाग्य तय करते हैं।`;
+      } else if (selectedFigure.id === 'cleopatra') {
+        reply = currentLang === 'EN'
+          ? `Regarding "${userMsg}": True sovereign power is governed by intellect, diplomatic mastery, and navigating alliances with unwavering poise.`
+          : `"${userMsg}" के संदर्भ में: संप्रभु सत्ता केवल सेनाओं से नहीं, बल्कि कूटनीति, तीक्ष्ण बुद्धि और गरिमापूर्ण संकल्प से चलाई जाती है।`;
       } else {
         reply = currentLang === 'EN'
-          ? `Strategy requires understanding both geography and human courage.`
-          : `रणनीति के लिए भूगोल और मानवीय साहस दोनों की समझ आवश्यक है।`;
+          ? `Regarding "${userMsg}": History is written by those who dare to forge their own fate.`
+          : `"${userMsg}" के संदर्भ में: इतिहास वही रचते हैं जो अपने भाग्य का निर्माण स्वयं करते हैं।`;
       }
       setMessages(prev => [...prev, { sender: 'figure', text: reply }]);
-    }, 800);
+      playVoice(reply);
+    }, 600);
   };
 
   return (
