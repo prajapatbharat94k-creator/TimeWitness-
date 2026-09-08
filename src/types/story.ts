@@ -14,7 +14,7 @@ export interface GenerateStoryRequest {
 
 export interface GenerateStoryResponse {
   scenes: HistoricalScene[];
-  source: 'gemini-api' | 'fallback';
+  source: 'gemini-api' | 'fallback' | 'demo';
   warning?: string;
   error?: string;
 }
