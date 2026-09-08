@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Google_Gemini-2.5_Flash-E37400?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Google_Gemini-2.0_Flash-E37400?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
   <img src="https://img.shields.io/badge/Framer_Motion-11.3-black?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT" />
 </p>
@@ -21,7 +21,7 @@
 - **Interactive Historical Figures**: Converse in real time with icons such as Chhatrapati Shivaji Maharaj, Rani Lakshmibai, Napoleon Bonaparte, and Cleopatra VII.
 - **Atmospheric Audio & Visual Cues**: Detailed visual prompts and ambient sound tags that set the emotional tone for each era.
 
-Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's official `@google/genai` SDK with **Gemini 2.5 Flash**.
+Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's official `@google/genai` SDK with **Gemini 2.0 Flash**.
 
 ---
 
@@ -49,7 +49,7 @@ Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's offi
 | **Language** | [TypeScript 5](https://www.typescriptlang.org/) |
 | **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) & [tailwind-merge](https://www.npmjs.com/package/tailwind-merge) |
 | **Animations** | [Framer Motion 11](https://www.framer.com/motion/) |
-| **AI SDK** | [`@google/genai`](https://www.npmjs.com/package/@google/genai) (`gemini-2.5-flash`) |
+| **AI SDK** | [`@google/genai`](https://www.npmjs.com/package/@google/genai) (`gemini-2.0-flash`) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
 
 ---
