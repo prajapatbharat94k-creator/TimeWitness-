@@ -1,187 +1,134 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
-import { HistoricalScene } from '@/types/story';
+import { HistoricalScene, HistoricalKnowledgeContext } from '@/types/story';
 import { findDemoStory } from '@/data/sampleStories';
-import { getCachedExperience, saveExperience } from '@/lib/db';
+import { getHistoricalKnowledge } from '@/utils/supabase/wikiService';
 
-// Re-export for convenience
+// Re-export for convenience (used in page.tsx imports)
 export type { HistoricalScene };
 
-// ─── Validation ───────────────────────────────────────────────────────────────
-
-function isValidScene(s: unknown): s is HistoricalScene {
-  if (!s || typeof s !== 'object') return false;
-  const scene = s as Record<string, unknown>;
-  return (
-    typeof scene.sceneNumber === 'number' &&
-    typeof scene.era === 'string' &&
-    typeof scene.title === 'string' &&
-    typeof scene.narration === 'string' &&
-    typeof scene.imagePrompt === 'string' &&
-    typeof scene.ambientTag === 'string'
-  );
-}
-
-function sanitizeTopic(topic: string): string {
-  return topic
-    .replace(/<[^>]*>/g, '') // strip any HTML
-    .replace(/[`'"\\]/g, '') // strip injection chars
-    .trim()
-    .substring(0, 500);
-}
-
-function validateAndFixScenes(raw: unknown): HistoricalScene[] | null {
-  if (!Array.isArray(raw)) return null;
-  const scenes = raw.filter(isValidScene);
-  if (scenes.length === 0) return null;
-  return scenes;
-}
-
-// ─── Fallback ────────────────────────────────────────────────────────────────
-
-function generateFallbackScenes(topic: string, language: string): HistoricalScene[] {
-  const isHindi = language === 'HI' || /[\u0900-\u097F]/.test(topic);
+// Fallback generator if API key is missing or API call fails
+function generateFallbackScenes(
+  topic: string, 
+  language: string, 
+  wiki?: HistoricalKnowledgeContext | null
+): HistoricalScene[] {
+  const isHindi = language === 'HI' || language === 'Hindi' || /[\u0900-\u097F]/.test(topic);
+  const eraStr = wiki?.era || 'Historical Era';
+  const extractSnippet = wiki?.extract 
+    ? wiki.extract.slice(0, 180) + '...' 
+    : '';
 
   return [
     {
       sceneNumber: 1,
-      era: 'Origin & Early Life',
-      title: isHindi ? 'आरंभ और बाल्यकाल' : 'Origin & Shadows of Youth',
+      era: `${eraStr} · Dawn of Era`,
+      title: isHindi ? `आरंभ और बाल्यकाल` : `Origin & Shadows of Youth`,
       narration: isHindi
-        ? `आप उस युग के गवाह हैं जहां ${topic} की कहानी शुरू हुई। किले के आंगन में हवा प्राचीन प्रार्थनाओं के साथ बहती है।`
-        : `You stand in the quiet shadows where the saga of ${topic} begins. The wind across ancient walls whispers of destiny.`,
-      imagePrompt: `Cinematic historical artwork showing early life and origins of ${topic}, dramatic atmospheric lighting, photorealistic concept art.`,
+        ? `आप उस युग के गवाह हैं जहां ${topic} की गाथा शुरू हुई। ${extractSnippet ? `(${extractSnippet})` : ''} किले के आंगन में हवा प्राचीन प्रार्थनाओं के साथ बहती है, और आप इतिहास का पहला मोड़ देखते हैं।`
+        : `You stand in the quiet shadows where the saga of ${topic} begins. ${extractSnippet ? `${extractSnippet} ` : ''}The wind across ancient stone walls whispers of destiny, casting early lights on a defining chapter.`,
+      imagePrompt: `Cinematic historical artwork showing early life and origins of ${topic}, dramatic atmospheric lighting, 8k resolution, photorealistic concept art.`,
       ambientTag: 'temple_bells_wind',
-      historicalFact: isHindi
-        ? `${topic} की उत्पत्ति और प्रारंभिक जीवन के बारे में ऐतिहासिक अभिलेख उपलब्ध हैं।`
-        : `Historical records document the early origins of ${topic}.`,
-      reconstructionNote: isHindi
-        ? 'यह दृश्य ऐतिहासिक अभिलेखों पर आधारित AI पुनर्निर्माण है।'
-        : 'This scene is an AI reconstruction based on historical records.',
     },
     {
       sceneNumber: 2,
-      era: 'Rise to Power',
-      title: isHindi ? 'सत्ता का उदय और प्रथम संघर्ष' : 'Rise to Power & First Battles',
+      era: `${eraStr} · The Gathering Storm`,
+      title: isHindi ? `सत्ता का उदय और प्रथम संघर्ष` : `Rise to Power & First Battles`,
       narration: isHindi
-        ? 'जैसे-जैसे समय बीतता है, आप तलवारों की गूंज और शपथ की आवाज सुनते हैं।'
-        : `As the years unfold, you hear the clash of steel and sacred oaths. Banners rise across rugged hills.`,
-      imagePrompt: `Historical painting depicting rising power of ${topic}, torchlit army encampment, cinematic volumetric smoke.`,
+        ? `जैसे-जैसे समय बीतता है, आप तलवारों की गूंज और शपथ की आवाज सुनते हैं। युद्ध के मैदान में पहला ध्वज फहराया जाता है और ${topic} के नेतृत्व में नया अध्याय लिखा जाने लगता है।`
+        : `As the years unfold, you hear the clash of steel and sacred oaths. Banners rise across rugged hills as the initial conflict sparks the journey of ${topic} to sovereignty.`,
+      imagePrompt: `Historical painting depicting the rising power and early battle preparations of ${topic}, torchlit army encampment, cinematic volumetric smoke.`,
       ambientTag: 'marching_drums',
-      historicalFact: `${isHindi ? 'इस काल में ' + topic + ' का उदय हुआ।' : `The rise of ${topic} is documented in historical chronicles.`}`,
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction of documented events.',
     },
     {
       sceneNumber: 3,
-      era: 'Defining Climax',
-      title: isHindi ? 'चरम मोड़ और धर्मयुद्ध' : 'The Defining Climax & Siege',
+      era: `${eraStr} · Pivotal Turning Point`,
+      title: isHindi ? `चरम मोड़ और धर्मयुद्ध` : `The Defining Climax & Turning Point`,
       narration: isHindi
-        ? 'अब आप निर्णायक क्षण के बीच खड़े हैं। एक साहसी फैसला साम्राज्य का भाग्य बदल देता है।'
-        : `You witness the ultimate turning point. A daring tactical stroke determines the fate of empires.`,
-      imagePrompt: `Dramatic battle climax of ${topic}, historical armor details, fiery dusk sky, oil painting style.`,
+        ? `अब आप निर्णायक क्षण के बीच खड़े हैं। तोपों के गोलों और आंधियों के बीच, एक साहसी फैसला साम्राज्य का भाग्य बदल देता है।`
+        : `You witness the ultimate turning point of the conflict. Amidst thundering artillery and smoke, a daring tactical stroke determines the fate of nations.`,
+      imagePrompt: `Dramatic battle climax of ${topic}, intense action scene, historical armor details, fiery dusk sky, hyperdetailed oil painting style.`,
       ambientTag: 'battle_horns_cannons',
-      historicalFact: isHindi ? 'यह निर्णायक घटना इतिहास में दर्ज है।' : 'This pivotal event is recorded in historical sources.',
-      simulationNote: isHindi
-        ? 'इस दृश्य में कुछ तत्व काल्पनिक हैं।'
-        : 'Some narrative elements in this scene are dramatized for immersion.',
     },
     {
       sceneNumber: 4,
-      era: 'Victory & Triumph',
-      title: isHindi ? 'महान विजय और राज्याभिषेक' : 'Sovereign Victory & Triumph',
+      era: `${eraStr} · Triumph`,
+      title: isHindi ? `महान विजय और संप्रभुता` : `Sovereign Victory & Triumph`,
       narration: isHindi
-        ? 'शंखध्वनि गूंजती है और विजय का झंडा फहराता है।'
-        : `Trumpets echo across mountain peaks as victory is claimed. Golden coins shower the crowds.`,
-      imagePrompt: `Grand victory celebration of ${topic}, royal golden robes, grand palace architecture, warm sunlight.`,
+        ? `शंखध्वनि गूंजती है और विजय का झंडा फहराता है। जनता के जयघोष के बीच ${topic} की संप्रभुता और गौरव स्थापित होता है।`
+        : `Trumpets echo across palace walls as victory is claimed. Golden banners unfurl, sealing the historic triumph of ${topic}.`,
+      imagePrompt: `Grand victory celebration and throne room coronation scene of ${topic}, royal golden robes, grand palace architecture, glowing warm sunlight.`,
       ambientTag: 'royal_fanfare',
-      historicalFact: isHindi ? 'यह विजय ऐतिहासिक अभिलेखों में दर्ज है।' : 'This victory is historically documented.',
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction of the documented triumph.',
     },
     {
       sceneNumber: 5,
-      era: 'Immortal Legacy',
-      title: isHindi ? 'अमर विरासत और इतिहास में स्थान' : 'Immortal Legacy & Eternal Impact',
+      era: `Legacy · The Modern World`,
+      title: isHindi ? `अमर विरासत और इतिहास में स्थान` : `Immortal Legacy & Eternal Impact`,
       narration: isHindi
-        ? `सदियों बाद भी, ${topic} के पदचिह्न इतिहास के पन्नों पर अंकित हैं।`
-        : `Centuries fade, yet the echoes of ${topic} resonate across generations. You stand amidst enduring monuments.`,
-      imagePrompt: `Majestic historical monument honoring the legacy of ${topic}, epic cinematic composition, golden hour lighting.`,
+        ? `सदियों बाद भी, इस महानायक के पदचिह्न इतिहास के पन्नों पर अंकित हैं। आप खड़े होकर उस अमर विरासत को नमन करते हैं जिसने विश्व इतिहास को दिशा दी।`
+        : `Centuries fade, yet the echoes of this reign resonate across generations. You stand amidst the enduring monuments, bearing witness to an immortal legacy.`,
+      imagePrompt: `Majestic historical monument and sunset silhouette honoring the legacy of ${topic}, epic cinematic composition, golden hour lighting.`,
       ambientTag: 'palace_ambience',
-      historicalFact: isHindi
-        ? `${topic} की विरासत आज भी जीवित है।`
-        : `The legacy of ${topic} continues to influence history and culture.`,
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction based on historical legacy.',
     },
   ];
 }
 
-// ─── API Route ────────────────────────────────────────────────────────────────
-
 export async function POST(req: Request) {
-  let requestedTopic = 'Historical Event';
-  let requestedLanguage = 'EN';
+  let topic = 'Historical Event';
+  let language = 'EN';
 
   try {
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON in request body.' }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    if (body.topic && typeof body.topic === 'string') {
+      topic = body.topic.trim();
+    }
+    if (body.language && typeof body.language === 'string') {
+      language = body.language.trim();
     }
 
-    if (!body || typeof body !== 'object') {
-      return NextResponse.json({ error: 'Request body must be a JSON object.' }, { status: 400 });
+    if (!topic) {
+      return NextResponse.json(
+        { error: 'Topic string is required in request body.' },
+        { status: 400 }
+      );
     }
 
-    const { topic, language = 'EN' } = body as Record<string, unknown>;
+    // ── High-speed Wikipedia + Supabase Knowledge Retrieval ─────────────────
+    const wikiContext = await getHistoricalKnowledge(topic).catch(() => null);
 
-    if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
-      return NextResponse.json({ error: 'topic (string) is required.' }, { status: 400 });
+    // ── Demo story fast-path: check curated dataset before hitting API ──────
+    const demoStory = findDemoStory(topic);
+    if (demoStory) {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return NextResponse.json({
+          scenes: demoStory.scenes,
+          source: 'demo',
+          wikiContext: wikiContext || undefined,
+          warning: 'Using curated demo story — no API key configured.',
+        });
+      }
     }
 
-    if (topic.trim().length > 500) {
-      return NextResponse.json({ error: 'topic must be 500 characters or fewer.' }, { status: 400 });
-    }
-
-    requestedTopic = sanitizeTopic(topic);
-    requestedLanguage = language === 'HI' ? 'HI' : 'EN';
-
-    // ── Fast path 1: Check curated demo story dataset if no API key ───────────
     const apiKey = process.env.GEMINI_API_KEY;
-    const demoStory = findDemoStory(requestedTopic);
-    if (!apiKey && demoStory) {
-      return NextResponse.json({
-        scenes: demoStory.scenes,
-        source: 'demo',
-        warning: 'Using curated demo story — no API key configured.',
-      });
-    }
 
-    // ── Fast path 2: Check Supabase cache ─────────────────────────────────────
-    const cached = await getCachedExperience(requestedTopic, requestedLanguage);
-    if (cached && cached.scenes.length > 0) {
-      return NextResponse.json({
-        scenes: cached.scenes,
-        experienceId: cached.experienceId,
-        source: 'supabase-cache',
-      });
-    }
-
-    // ── If no API key and no demo story: use structured fallback ──────────────
     if (!apiKey) {
-      const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
-      return NextResponse.json({
-        scenes: fallbackData,
+      console.warn('GEMINI_API_KEY environment variable is missing. Returning structured fallback scenes.');
+      const fallbackData = generateFallbackScenes(topic, language, wikiContext);
+      return NextResponse.json({ 
+        scenes: fallbackData, 
         source: 'fallback',
-        warning: 'GEMINI_API_KEY not configured. Showing structured preview.',
+        wikiContext: wikiContext || undefined
       });
     }
 
-    // ── Call Gemini with 8s timeout ──────────────────────────────────────────
+    // Initialize Google Gen AI SDK
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `You are a world-class historical narrative engine for TimeWitness.
-Generate a structured 5-scene historical journey for the topic: "${requestedTopic}".
-Language requested for narration: ${requestedLanguage === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
+Generate a structured 5-scene historical journey for the topic: "${topic}".
+Language requested for narration: ${language === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
+${wikiContext?.extract ? `Verified Historical Context from Knowledge Base: "${wikiContext.extract}"` : ''}
 
 Structure the journey into exactly 5 sequential historical scenes:
 Scene 1: Origin / Early Life
@@ -190,13 +137,7 @@ Scene 3: Defining Climax / Turning Point
 Scene 4: Victory / Major Triumph
 Scene 5: Legacy / Historical Impact
 
-For each scene, provide:
-- narration: Dramatic second-person storytelling ("You stand...", "You witness...") in ${requestedLanguage === 'HI' ? 'Hindi' : 'English'}
-- historicalFact: A single VERIFIED historical fact about this moment (do NOT fabricate — if uncertain, write "Source verification unavailable for this claim.")
-- reconstructionNote: Brief note on what is AI reconstructed / dramatized (label it "AI Historical Reconstruction")
-- simulationNote: If any element is hypothetical/simulated, note it here; else leave empty string
-
-IMPORTANT: Never present invented dialogue as authentic historical quotes. Label all creative content clearly.
+Use dramatic second-person storytelling ("You stand...", "You witness...") in the narration field in the requested language (${language}).
 Ensure strict JSON output conforming to the schema.`;
 
     const responseSchema = {
@@ -205,20 +146,18 @@ Ensure strict JSON output conforming to the schema.`;
       items: {
         type: Type.OBJECT,
         properties: {
-          sceneNumber:        { type: Type.INTEGER, description: 'Scene number 1 to 5' },
-          era:                { type: Type.STRING,  description: 'Historical era and location, e.g., "1674 AD, Raigad Fort"' },
-          title:              { type: Type.STRING,  description: 'Short scene headline' },
-          narration:          { type: Type.STRING,  description: 'Dramatic second-person narrative in the requested language' },
-          imagePrompt:        { type: Type.STRING,  description: 'Detailed art prompt for historical visual generation' },
-          ambientTag:         { type: Type.STRING,  description: 'Short soundscape key, e.g. "battle_horns", "palace_ambience"' },
-          historicalFact:     { type: Type.STRING,  description: 'A verified historical fact' },
-          reconstructionNote: { type: Type.STRING,  description: 'AI reconstruction disclosure note' },
-          simulationNote:     { type: Type.STRING,  description: 'Simulated elements disclosure note' },
+          sceneNumber: { type: Type.INTEGER, description: 'Scene number 1 to 5' },
+          era: { type: Type.STRING, description: 'Historical era and location, e.g., "1674 AD, Raigad Fort"' },
+          title: { type: Type.STRING, description: 'Short scene headline' },
+          narration: { type: Type.STRING, description: 'Dramatic second-person narrative story in the requested language' },
+          imagePrompt: { type: Type.STRING, description: 'Detailed art prompt for historical visual generation' },
+          ambientTag: { type: Type.STRING, description: 'Short soundscape key, e.g. "battle_horns", "palace_ambience", "marching_drums"' },
         },
         required: ['sceneNumber', 'era', 'title', 'narration', 'imagePrompt', 'ambientTag'],
       },
     };
 
+    // ── 8-second timeout wrapper ─────────────────────────────────────────────
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 8000)
     );
@@ -234,50 +173,44 @@ Ensure strict JSON output conforming to the schema.`;
     });
 
     const response = await Promise.race([apiCallPromise, timeoutPromise]);
-    const responseText = response.text ? response.text.trim() : '[]';
 
-    let parsedRaw: unknown;
-    try {
-      parsedRaw = JSON.parse(responseText);
-    } catch {
-      throw new Error('Gemini response was not valid JSON');
+    const responseText = response.text;
+    if (!responseText) {
+      throw new Error('Empty response received from Gemini API');
     }
 
-    const scenes = validateAndFixScenes(parsedRaw);
-    if (!scenes) {
-      throw new Error('Gemini response did not match expected scene schema');
-    }
+    const scenes: HistoricalScene[] = JSON.parse(responseText);
 
-    // Persist to Supabase / Local storage (non-blocking)
-    const experienceId = await saveExperience(requestedTopic, requestedLanguage, scenes);
-
-    return NextResponse.json({
-      scenes,
-      experienceId: experienceId ?? null,
+    return NextResponse.json({ 
+      scenes, 
       source: 'gemini-api',
+      wikiContext: wikiContext || undefined
     });
+  } catch (error: any) {
+    console.error('Error generating historical story with Gemini API:', error);
 
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[generate-story] Error:', message);
+    const wikiContext = await getHistoricalKnowledge(topic).catch(() => null);
 
-    // Try demo story first if available
-    const demo = findDemoStory(requestedTopic);
-    if (demo) {
+    // ── On timeout or rate-limit: try demo story first ──────────────────────
+    const demoStory = findDemoStory(topic);
+    if (demoStory) {
       return NextResponse.json({
-        scenes: demo.scenes,
+        scenes: demoStory.scenes,
         source: 'demo',
-        warning: message === 'GEMINI_TIMEOUT'
+        wikiContext: wikiContext || undefined,
+        warning: error?.message === 'GEMINI_TIMEOUT'
           ? 'API response exceeded 8s — showing curated demo story.'
           : 'API unavailable — showing curated demo story.',
       });
     }
 
-    const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
+    // ── Generic fallback ─────────────────────────────────────────────────────
+    const fallbackData = generateFallbackScenes(topic, language, wikiContext);
     return NextResponse.json({
       scenes: fallbackData,
       source: 'fallback',
-      warning: 'Experience generation temporarily unavailable. Showing structured preview.',
+      wikiContext: wikiContext || undefined,
+      warning: 'API invocation failed, returned structured fallback data.',
     });
   }
 }

@@ -7,7 +7,7 @@ import SearchBar from '@/components/SearchBar';
 import ScenePlaceholder from '@/components/ScenePlaceholder';
 import TalkToHistoryModal from '@/components/TalkToHistoryModal';
 import { ToastProvider, useToast } from '@/components/ToastProvider';
-import { HistoricalScene } from '@/types/story';
+import { HistoricalScene, HistoricalKnowledgeContext } from '@/types/story';
 import { motion } from 'framer-motion';
 import { 
   Hourglass, 
@@ -30,6 +30,7 @@ function AppInner() {
   const [talkDefaultFigure, setTalkDefaultFigure] = useState<string | undefined>(undefined);
   const [isMuted, setIsMuted] = useState(false);
   const [storySource, setStorySource] = useState<string>('');
+  const [wikiContext, setWikiContext] = useState<HistoricalKnowledgeContext | null>(null);
 
   // ── Deep-link: auto-load from ?witness= query param on mount ──────────────
   useEffect(() => {
@@ -67,6 +68,7 @@ function AppInner() {
     setIsLoading(true);
     setGeneratedScenes([]);
     setStorySource('');
+    setWikiContext(null);
 
     // Scroll smoothly to scene viewer
     const el = document.getElementById('scene-viewer');
@@ -90,6 +92,7 @@ function AppInner() {
       if (data.scenes && Array.isArray(data.scenes)) {
         setGeneratedScenes(data.scenes);
         setStorySource(data.source ?? '');
+        setWikiContext(data.wikiContext ?? null);
 
         // ── Toast based on source ───────────────────────────────────────────
         if (data.source === 'demo') {
@@ -162,6 +165,7 @@ function AppInner() {
           isLoading={isLoading}
           onOpenTalkToHistory={handleOpenTalkToHistory}
           source={storySource}
+          wikiContext={wikiContext}
           isMuted={isMuted}
           onToggleMute={() => setIsMuted((m) => !m)}
           onToastSuccess={toast.success}

@@ -1,0 +1,438 @@
+[
+  {
+    "slug": "shivaji-maharaj",
+    "title": "Shivaji",
+    "description": "Chhatrapati of the Marathas from 1674 to 1680",
+    "extract": "Shivaji I was an Indian ruler and a member of the Bhonsle dynasty. Shivaji inherited a fiefdom from his father who served as a retainer for the Sultanate of Bijapur, which later formed the genesis of the Maratha Kingdom. In 1674, he was formally crowned the Chhatrapati of his realm at Raigad Fort.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Shivaji_British_Museum.jpg/330px-Shivaji_British_Museum.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Shivaji",
+    "era": "1630–1680 AD",
+    "tags": [
+      "maratha",
+      "swarajya",
+      "shivaji",
+      "raigad"
+    ],
+    "updated_at": "2026-09-09T07:03:59.590Z"
+  },
+  {
+    "slug": "rani-lakshmibai",
+    "title": "Rani of Jhansi",
+    "description": "Prominent leader of the 1857 Indian rebellion",
+    "extract": "The Rani of Jhansi, also known as Rani Lakshmibai, was one of the leading figures of the Indian Rebellion of 1857. The queen consort of the princely state of Jhansi from 1843 to 1853, she assumed its leadership after the outbreak of the conflict and fought several battles against the British. Her life and deeds are celebrated in modern India and she remains a potent symbol of Indian nationalism.",
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Rani_of_jhansi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "page_url": "https://en.wikipedia.org/wiki/Rani_of_Jhansi",
+    "era": "1828–1858 AD",
+    "tags": [
+      "jhansi",
+      "1857",
+      "freedom",
+      "sepoy"
+    ],
+    "updated_at": "2026-09-09T07:03:59.829Z"
+  },
+  {
+    "slug": "napoleon-bonaparte",
+    "title": "Napoleon",
+    "description": "Emperor of the French (1804–1814; 1815)",
+    "extract": "Napoleon Bonaparte, later known by his regnal name Napoleon I, was Emperor of the French from 18 May 1804 until his first abdication in 1814, with a brief restoration during the Hundred Days in 1815. He rose to prominence as a general during the French Revolution and led a series of military campaigns across Europe and the Middle East during the French Revolutionary and Napoleonic Wars. As a statesman, he implemented numerous legal and administrative reforms in France and Europe.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg/330px-Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Napoleon",
+    "era": "1769–1821 AD",
+    "tags": [
+      "france",
+      "waterloo",
+      "emperor",
+      "europe"
+    ],
+    "updated_at": "2026-09-09T07:04:00.078Z"
+  },
+  {
+    "slug": "ashoka-the-great",
+    "title": "Ashoka",
+    "description": "Mauryan emperor from 269 to 232 BCE",
+    "extract": "Ashoka, also known as Asoka or Aśoka, most commonly known as Ashoka the Great, was Emperor of Magadha from c. 268 BCE until his death, and the third ruler from the Mauryan dynasty. His empire covered a large part of the Indian subcontinent, stretching from present-day Afghanistan in the west to present-day Bangladesh in the east, with its capital at Pataliputra. A patron of Buddhism, he is credited with an important role in the spread of Buddhism across ancient Asia.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Ashoka%27s_visit_to_the_Ramagrama_stupa_Sanchi_Stupa_1_Southern_gateway.jpg/330px-Ashoka%27s_visit_to_the_Ramagrama_stupa_Sanchi_Stupa_1_Southern_gateway.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Ashoka",
+    "era": "304–232 BCE",
+    "tags": [
+      "maurya",
+      "buddhism",
+      "kalinga",
+      "magadha"
+    ],
+    "updated_at": "2026-09-09T07:04:00.349Z"
+  },
+  {
+    "slug": "indus-valley-civilisation",
+    "title": "Indus Valley Civilisation",
+    "description": "Bronze Age civilisation in South Asia",
+    "extract": "The Indus Valley Civilisation (IVC), also known as the Indus Civilisation, was a Bronze Age civilisation in the northwestern regions of South Asia, lasting from 3300 BCE to 1300 BCE, and in its mature form from 2600 BCE to 1900 BCE. Together with ancient Egypt, Mesopotamia, and China, it was one of the four centres of the ancient world; it was geographically larger than ancient Egypt and Mesopotamia combined. It spanned much of Pakistan, northwestern India, and northeast Afghanistan. The civilisation flourished in the alluvial plain of the Indus River and along a system of perennial monsoon-fed rivers that once coursed in the vicinity of the Ghaggar-Hakra, a seasonal river in northwest India and eastern Pakistan.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Indus_Valley_Civilization%2C_Mature_Phase_%282600-1900_BCE%29.png/330px-Indus_Valley_Civilization%2C_Mature_Phase_%282600-1900_BCE%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Indus_Valley_Civilisation",
+    "era": "3300–1300 BCE",
+    "tags": [
+      "harappa",
+      "mohenjo-daro",
+      "bronze age"
+    ],
+    "updated_at": "2026-09-09T07:04:00.606Z"
+  },
+  {
+    "slug": "battle-of-panipat",
+    "title": "First Battle of Panipat",
+    "description": "1526 battle during the Mughal conquest of the Delhi Sultanate",
+    "extract": "The First Battle of Panipat, on 21 April 1526 was fought between the invading forces of Babur against Ibrahim Khan Lodi, the Sultan of Delhi, in North India. Babur's forces, employing gunpowder firearms and cannons, defeated Ibrahim. This was one of the earliest battles involving gunpowder arms on the Indian subcontinent. The victory marked the beginning of Mughal rule in India.",
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/The_battle_of_Panipat_and_the_death_of_Sultan_Ibr%C4%81h%C4%ABm%2C_the_last_of_the_L%C5%8Dd%C4%AB_Sultans_of_Delhi.jpg/330px-The_battle_of_Panipat_and_the_death_of_Sultan_Ibr%C4%81h%C4%ABm%2C_the_last_of_the_L%C5%8Dd%C4%AB_Sultans_of_Delhi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/First_Battle_of_Panipat",
+    "era": "1526 AD",
+    "tags": [
+      "panipat",
+      "babar",
+      "ibrahim lodi",
+      "mughal"
+    ],
+    "updated_at": "2026-09-09T07:04:00.850Z"
+  },
+  {
+    "slug": "french-revolution",
+    "title": "French Revolution",
+    "description": "1789–1799 sociopolitical change in France",
+    "extract": "The French Revolution was a period of political and societal change in France that began with the Estates General of 1789 and ended with the Coup of 18 Brumaire on 9 November 1799. Many of the revolution's ideas are considered fundamental principles of liberal democracy, and its values remain central to modern French political discourse. It was caused by a combination of social, political, and economic factors which the existing regime proved unable to manage.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Anonymous_-_Prise_de_la_Bastille.jpg/330px-Anonymous_-_Prise_de_la_Bastille.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/French_Revolution",
+    "era": "1789–1799 AD",
+    "tags": [
+      "bastille",
+      "liberty",
+      "france",
+      "monarchy"
+    ],
+    "updated_at": "2026-09-09T07:04:01.084Z"
+  },
+  {
+    "slug": "chandragupta-maurya",
+    "title": "Chandragupta Maurya",
+    "description": "Founder of the Maurya Empire (340–295 BCE)",
+    "extract": "Chandragupta Maurya was the founder and the first emperor of the Maurya Empire, based in Magadha in the Indian subcontinent.",
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Lomas_Rishi_entrance.jpg/330px-Lomas_Rishi_entrance.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Chandragupta_Maurya",
+    "era": "340–295 BCE",
+    "tags": [
+      "chanakya",
+      "maurya",
+      "pataliputra"
+    ],
+    "updated_at": "2026-09-09T07:04:01.353Z"
+  },
+  {
+    "slug": "maharana-pratap",
+    "title": "Maharana Pratap",
+    "description": "Maharana of Mewar from 1572 to 1597",
+    "extract": "Pratap Singh I, popularly known as Maharana Pratap, was king of the Kingdom of Mewar, in north-western India in the present-day state of Rajasthan, from 1572 until his death in 1597. He is notable for leading the Rajput resistance against the expansionist policy of the Mughal Emperor Akbar including the battle of Haldighati.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Maharana_Pratap_By_Surendra_Singh_Shaktawat.jpg/330px-Maharana_Pratap_By_Surendra_Singh_Shaktawat.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Maharana_Pratap",
+    "era": "1540–1597 AD",
+    "tags": [
+      "mewar",
+      "haldighati",
+      "rajput"
+    ],
+    "updated_at": "2026-09-09T07:04:01.591Z"
+  },
+  {
+    "slug": "subhas-chandra-bose",
+    "title": "Subhas Chandra Bose",
+    "description": "Indian nationalist leader (1897–1945)",
+    "extract": "Subhas Chandra Bose was an Indian anti-colonial nationalist whose defiance of British authority in India made him a hero among many Indians, but his wartime alliances with Nazi Germany and the Empire of Japan left a legacy vexed by authoritarianism, antisemitism, and military failure. The honorific Netaji was first applied to Bose in Germany in early 1942—by the Indian soldiers of the Indische Legion and by the German and Indian officials in the Special Bureau for India in Berlin. It is now used throughout India.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Subhas_Chandra_Bose_NRB.jpg/330px-Subhas_Chandra_Bose_NRB.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Subhas_Chandra_Bose",
+    "era": "1897–1945 AD",
+    "tags": [
+      "netaji",
+      "ina",
+      "freedom fighter"
+    ],
+    "updated_at": "2026-09-09T07:04:01.842Z"
+  },
+  {
+    "slug": "bhagat-singh",
+    "title": "Bhagat Singh",
+    "description": "Indian revolutionary (1907–1931)",
+    "extract": "Bhagat Singh was an Indian anti-colonial revolutionary who participated in the mistaken murder of a junior British police officer in December 1928 in what was intended to be retaliation for the death of an Indian nationalist. He later took part in a largely symbolic bombing of the Central Legislative Assembly in Delhi and a hunger strike in jail, which—on the back of sympathetic coverage in Indian-owned newspapers—turned him into a household name in the Punjab region, and, after his execution at age 23, a martyr and folk hero in Northern India. Borrowing ideas from Bolshevism and anarchism, the charismatic Bhagat Singh electrified a growing militancy in India in the 1930s and prompted urgent introspection within the Indian National Congress's nonviolent, and eventually successful, campaign for India's independence.",
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Lahore_conspiracy_case_poster_9th_Oct_193o_jindal_sunam_12x9_copy_%28cropped%29.jpg/330px-Lahore_conspiracy_case_poster_9th_Oct_193o_jindal_sunam_12x9_copy_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Bhagat_Singh",
+    "era": "1907–1931 AD",
+    "tags": [
+      "revolution",
+      "independence",
+      "socialism"
+    ],
+    "updated_at": "2026-09-09T07:04:02.084Z"
+  },
+  {
+    "slug": "alexander-the-great",
+    "title": "Alexander the Great",
+    "description": "King of Macedon from 336 to 323 BC",
+    "extract": "Alexander III of Macedon, most commonly known as Alexander the Great, was king of the ancient Greek kingdom of Macedon from 336 BC until his death. He was the son of Philip II, born to him by his fourth wife, Olympias, and ascended to the throne at the age of 20 after Philip was assassinated. Alexander spent most of his reign conducting a lengthy military campaign throughout Asia and Egypt, and by the age of 30, he had created one of the largest empires in history, stretching from Greece to northwestern India. He was undefeated in battle and is widely considered to be one of history's greatest and most successful military commanders.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Alexander_Mosaic_detail_of_Alexander_the_Great_%283x4_cropped%29.jpg/330px-Alexander_Mosaic_detail_of_Alexander_the_Great_%283x4_cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Alexander_the_Great",
+    "era": "356–323 BCE",
+    "tags": [
+      "macedon",
+      "greece",
+      "conquest",
+      "persia"
+    ],
+    "updated_at": "2026-09-09T07:04:02.314Z"
+  },
+  {
+    "slug": "julius-caesar",
+    "title": "Julius Caesar",
+    "description": "Roman general and dictator (100–44 BC)",
+    "extract": "Gaius Julius Caesar was a Roman general, statesman, and author who was the dictator of the Roman Republic almost continuously from 49 BC until his assassination in 44 BC. A member of the First Triumvirate, he led the Roman armies through the Gallic Wars and defeated his political rival Pompey in Caesar's civil war. He consolidated power and was titled as dictator perpetuo in 44 BC, helping create the political conditions that led to the collapse of the Roman Republic and the emergence of the Roman Empire. For his role in these events, he is regarded as one of history's most influential figures.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Retrato_de_Julio_C%C3%A9sar_%2826724093101%29_%28cropped%29.jpg/330px-Retrato_de_Julio_C%C3%A9sar_%2826724093101%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Julius_Caesar",
+    "era": "100–44 BCE",
+    "tags": [
+      "rome",
+      "senate",
+      "empire",
+      "republic"
+    ],
+    "updated_at": "2026-09-09T07:04:02.568Z"
+  },
+  {
+    "slug": "genghis-khan",
+    "title": "Genghis Khan",
+    "description": "Khan of the Mongol Empire from 1206 to 1227",
+    "extract": "Genghis Khan, also known as Chinggis Khan, was the founder and first khan of the Mongol Empire. After spending most of his life uniting the Mongol tribes, he launched a series of military campaigns, conquering large parts of China and Central Asia.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/YuanEmperorAlbumGenghisPortrait.jpg/330px-YuanEmperorAlbumGenghisPortrait.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Genghis_Khan",
+    "era": "1162–1227 AD",
+    "tags": [
+      "mongol",
+      "steppe",
+      "empire"
+    ],
+    "updated_at": "2026-09-09T07:04:02.847Z"
+  },
+  {
+    "slug": "american-revolution",
+    "title": "American Revolutionary War",
+    "description": "1775–1783 conflict in North America",
+    "extract": "The American Revolutionary War, also known as the Revolutionary War or American War of Independence or simply the American Revolution, was the armed conflict that comprised the final eight years of the broader American Revolution, in which American Patriot forces organized as the Continental Army and, commanded by George Washington, defeated the British Army. The conflict was fought in North America, the Caribbean, and the Atlantic Ocean. The war's outcome seemed uncertain for most of the war, but Washington and the Continental Army's decisive victory in the Siege of Yorktown in 1781 led King George III and the Kingdom of Great Britain to negotiate an end to the war. In 1783, in the Treaty of Paris, the British monarchy acknowledged the independence of the Thirteen Colonies, leading to the establishment of the United States as an independent and sovereign nation.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Surrender_of_Lord_Cornwallis.jpg/330px-Surrender_of_Lord_Cornwallis.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/American_Revolutionary_War",
+    "era": "1775–1783 AD",
+    "tags": [
+      "america",
+      "independence",
+      "washington"
+    ],
+    "updated_at": "2026-09-09T07:04:03.135Z"
+  },
+  {
+    "slug": "renaissance",
+    "title": "Renaissance",
+    "description": "European cultural period of the 14th to 17th centuries",
+    "extract": "The Renaissance was a European period of history and cultural movement taking place at the end of the Late Middle Ages and the beginning of the early modern era. It is variously defined as covering the 15th and 16th centuries or, more broadly, as lasting from the 14th century to the 17th. It was characterized by the European rediscovery and revival of the literary, philosophical, and artistic achievements of classical antiquity. Associated with great change in art, architecture, politics, literature, exploration and technology, the Renaissance was first centered in the Republic of Florence, then spread to the rest of Italy and later throughout Europe.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Da_Vinci_Vitruve_Luc_Viatour.jpg/330px-Da_Vinci_Vitruve_Luc_Viatour.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Renaissance",
+    "era": "14th–17th Century",
+    "tags": [
+      "art",
+      "florence",
+      "science",
+      "humanism"
+    ],
+    "updated_at": "2026-09-09T07:04:03.689Z"
+  },
+  {
+    "slug": "fall-of-constantinople",
+    "title": "Fall of Constantinople",
+    "description": "1453 Ottoman conquest of the Byzantine capital",
+    "extract": "Constantinople, the capital city of the Byzantine Empire, was captured by the Ottoman Empire on 29 May 1453 as part of the culmination of a 53-day siege which had begun on 6 April.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Siege_of_Constantinople_fresco%2C_Moldovi%C8%9Ba_monastery%2C_Vatra_Moldovi%C8%9Bei%2C_2017.jpg/330px-Siege_of_Constantinople_fresco%2C_Moldovi%C8%9Ba_monastery%2C_Vatra_Moldovi%C8%9Bei%2C_2017.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Fall_of_Constantinople",
+    "era": "1453 AD",
+    "tags": [
+      "ottoman",
+      "byzantine",
+      "mehmed ii"
+    ],
+    "updated_at": "2026-09-09T07:04:03.936Z"
+  },
+  {
+    "slug": "battle-of-plassey",
+    "title": "Battle of Plassey",
+    "description": "1757 battle of the Seven Years' War",
+    "extract": "The Battle of Plassey was a decisive victory of the British East India Company, under the leadership of Robert Clive, over the Nawab of Bengal and his French allies on 23 June 1757. The victory was made possible by the betrayal of Mir Jafar, Nawab Siraj-ud-Daulah's commander in chief, as well as much of the Bengal Subah's armies being earlier committed against an Afghan invasion led by Ahmad Shah Durrani against the Mughal Empire. The battle helped the British East India Company take complete control of Bengal in 1773. Over the next hundred years, they continued to expand their control over vast territories in the rest of the Indian subcontinent and Burma.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Lord_Clive_meeting_with_Mir_Jafar_after_the_Battle_of_Plassey.jpg/330px-Lord_Clive_meeting_with_Mir_Jafar_after_the_Battle_of_Plassey.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Battle_of_Plassey",
+    "era": "1757 AD",
+    "tags": [
+      "clive",
+      "siraj-ud-daulah",
+      "east india company"
+    ],
+    "updated_at": "2026-09-09T07:04:04.167Z"
+  },
+  {
+    "slug": "mughal-empire",
+    "title": "Mughal Empire",
+    "description": "1526–1857 empire in South Asia",
+    "extract": "The Mughal Empire was an early modern empire in South Asia. At its peak, the empire stretched from the outer fringes of the Indus River Basin in the west, northern Afghanistan in the northwest, and Kashmir in the north, to the highlands of present-day Assam and Bangladesh in the east, and the uplands of the Deccan Plateau in South India.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/51/Joppen1907India1700a.jpg/330px-Joppen1907India1700a.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Mughal_Empire",
+    "era": "1526–1857 AD",
+    "tags": [
+      "akbar",
+      "shah jahan",
+      "agra",
+      "delhi"
+    ],
+    "updated_at": "2026-09-09T07:04:04.402Z"
+  },
+  {
+    "slug": "chola-dynasty",
+    "title": "Chola dynasty",
+    "description": "Tamil dynasty of South India",
+    "extract": "The Chola dynasty was a Tamil dynasty originating from Southern India. At its height, it ruled over the Chola Empire, an expansive maritime empire. The earliest datable references to the Chola are from inscriptions dated to the 3rd century BCE during the reign of Ashoka of the Maurya Empire. The Chola empire was at its peak and achieved imperialism under the Medieval Cholas in the mid-9th century CE. As one of the Three Crowned Kings of Tamilakam, along with the Chera and Pandya, the dynasty continued to govern over varying territories until the 13th century CE.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Thanjavur_temple.jpg/330px-Thanjavur_temple.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Chola_dynasty",
+    "era": "300 BCE–1279 CE",
+    "tags": [
+      "rajaraja",
+      "rajendra",
+      "maritime",
+      "tamil"
+    ],
+    "updated_at": "2026-09-09T07:04:04.862Z"
+  },
+  {
+    "slug": "tipu-sultan",
+    "title": "Tipu Sultan",
+    "description": "Sultan of Mysore from 1782 to 1799",
+    "extract": "Tipu Sultan, commonly referred to as Sher-e-Mysore, was the Sultan of Mysore from 1782 until his death in 1799. He was a pioneer of rocket artillery. He expanded the iron-cased Mysorean rockets and commissioned the military manual Fathul Mujahidin. The economy of Mysore reached a zenith during his reign. He deployed rockets against advances of British forces and their allies during the Anglo-Mysore Wars, including the Battle of Pollilur and Siege of Srirangapatna.",
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/TipuSultan1790.jpg/330px-TipuSultan1790.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Tipu_Sultan",
+    "era": "1751–1799 AD",
+    "tags": [
+      "mysore",
+      "tiger of mysore",
+      "anglo-mysore"
+    ],
+    "updated_at": "2026-09-09T07:04:05.104Z"
+  },
+  {
+    "slug": "maratha-empire",
+    "title": "Maratha Empire",
+    "description": "1674–1818 empire in the Indian subcontinent",
+    "extract": "The Maratha Empire, also referred to as the Maratha Confederacy, was an early modern polity in the Indian subcontinent. For most of its existence, it comprised the realms of the Peshwa and four major independent Maratha states under the nominal leadership of the former and nominal loyalty to the Chhatrapatis who were successors of Shivaji.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/India1760_1905.jpg/330px-India1760_1905.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Maratha_Empire",
+    "era": "1674–1818 AD",
+    "tags": [
+      "peshwa",
+      "deccan",
+      "pune",
+      "swarajya"
+    ],
+    "updated_at": "2026-09-09T07:04:05.489Z"
+  },
+  {
+    "slug": "world-war-i",
+    "title": "World War I",
+    "description": "Global conflict from 1914 to 1918",
+    "extract": "World War I, or the First World War, also known as the Great War, was a global conflict between two coalitions: the Allies and the Central Powers. One of the deadliest conflicts in history, World War I resulted in an estimated 15 to 22 million deaths, including those in war crimes and genocides. The war also helped spread the Spanish flu pandemic. The conflict saw important developments in weaponry, including the first large-scale use of machine guns, artillery, aircraft, chemical weapons, and tanks.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Bataille_de_Verdun_1916.jpg/330px-Bataille_de_Verdun_1916.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/World_War_I",
+    "era": "1914–1918 AD",
+    "tags": [
+      "great war",
+      "allies",
+      "trenches",
+      "versailles"
+    ],
+    "updated_at": "2026-09-09T07:04:05.719Z"
+  },
+  {
+    "slug": "world-war-ii",
+    "title": "World War II",
+    "description": "Global conflict from 1939 to 1945",
+    "extract": "World War II, or the Second World War, was a global conflict between two coalitions: the Allies and the Axis powers. Nearly all of the world's countries participated, with many engaging in total war on an unprecedented scale. World War II was the deadliest conflict in history, causing the deaths of 60 to 75 million people, a majority of whom were civilians. Millions died as a result of massacres, starvation, disease, and genocides including the Holocaust. After the Allied victory, Germany, Austria, Japan, and Korea were occupied, and German and Japanese leaders were tried for war crimes.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Bundesarchiv_Bild_101I-646-5188-17%2C_Flugzeuge_Junkers_Ju_87.jpg/330px-Bundesarchiv_Bild_101I-646-5188-17%2C_Flugzeuge_Junkers_Ju_87.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/World_War_II",
+    "era": "1939–1945 AD",
+    "tags": [
+      "axis",
+      "allies",
+      "d-day",
+      "atomic bomb"
+    ],
+    "updated_at": "2026-09-09T07:04:05.979Z"
+  },
+  {
+    "slug": "magna-carta",
+    "title": "Magna Carta",
+    "description": "English charter of freedoms made in 1215",
+    "extract": "Magna Carta, sometimes spelled Magna Charta, is a royal charter of rights sealed by King John of England at Runnymede, near Windsor, on 15 June 1215. First drafted by the Archbishop of Canterbury, Cardinal Stephen Langton, to make peace between the unpopular king and a group of rebel barons who demanded that the King confirm the Charter of Liberties, it promised the protection of church rights, protection for the barons from illegal imprisonment, access to swift and impartial justice, and limitations on feudal payments to the Crown, to be implemented through a council of 25 barons. Neither side stood by their commitments, and the charter was annulled by Pope Innocent III, leading to the First Barons' War.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Magna_Carta_%28British_Library_Cotton_MS_Augustus_II.106%29.jpg/330px-Magna_Carta_%28British_Library_Cotton_MS_Augustus_II.106%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Magna_Carta",
+    "era": "1215 AD",
+    "tags": [
+      "england",
+      "charter",
+      "rights",
+      "king john"
+    ],
+    "updated_at": "2026-09-09T07:04:06.214Z"
+  },
+  {
+    "slug": "leonardo-da-vinci",
+    "title": "Leonardo da Vinci",
+    "description": "Italian polymath (1452–1519)",
+    "extract": "Leonardo di ser Piero da Vinci was an Italian polymath of the High Renaissance who was active as a painter, draughtsman, engineer, scientist, theorist, sculptor, and architect. While his fame initially rested on his achievements as a painter, he has also become known for his notebooks, in which he made drawings and notes on a variety of subjects, including anatomy, astronomy, botany, cartography, painting, and palaeontology. Leonardo is widely regarded as a genius who epitomised the Renaissance humanist ideal, and his collective works contributed to the development of European art to an extent rivalled only by that of his younger contemporary Michelangelo.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Francesco_Melzi_-_Portrait_of_Leonardo.png/330px-Francesco_Melzi_-_Portrait_of_Leonardo.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Leonardo_da_Vinci",
+    "era": "1452–1519 AD",
+    "tags": [
+      "mona lisa",
+      "renaissance",
+      "polymath"
+    ],
+    "updated_at": "2026-09-09T07:04:06.463Z"
+  },
+  {
+    "slug": "gautama-buddha",
+    "title": "The Buddha",
+    "description": "Founder of Buddhism",
+    "extract": "Siddhartha Gautama, most commonly referred to as the Buddha, was a wandering religious teacher who lived in the eastern Indo-Gangetic Plains during the 6th or 5th century BCE and founded Buddhism. According to Buddhist legends, he was born in Lumbini, in what is now Nepal, to royal parents of the Shakya clan, but renounced his home life to live as a wandering ascetic. After leading a life of mendicancy, asceticism, and meditation, he attained nirvana at Bodh Gaya in what is now Bihar, India. The Buddha then wandered through the lower Indo-Gangetic Plain, teaching and building a monastic order (sangha). Buddhist tradition holds he died in Kushinagar and reached parinirvana.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Buddha_in_Sarnath_Museum_%28Dhammajak_Mutra%29.jpg/330px-Buddha_in_Sarnath_Museum_%28Dhammajak_Mutra%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/The_Buddha",
+    "era": "c. 6th–5th Century BCE",
+    "tags": [
+      "buddhism",
+      "dharma",
+      "enlightenment"
+    ],
+    "updated_at": "2026-09-09T07:04:06.737Z"
+  },
+  {
+    "slug": "mahatma-gandhi",
+    "title": "Mahatma Gandhi",
+    "description": "Indian independence activist (1869–1948)",
+    "extract": "Mohandas Karamchand Gandhi was an Indian lawyer, anti-colonial nationalist, and political ethicist who employed nonviolent resistance to lead the successful campaign for India's independence from British rule, and to later inspire movements for civil rights and freedom across the world. The honorific Mahātmā, first applied to him in 1914 in South Africa, is now used throughout the world.",
+    "thumbnail_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg/330px-Mahatma-Gandhi%2C_studio%2C_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "page_url": "https://en.wikipedia.org/wiki/Mahatma_Gandhi",
+    "era": "1869–1948 AD",
+    "tags": [
+      "ahimsa",
+      "satyagraha",
+      "independence",
+      "dandi"
+    ],
+    "updated_at": "2026-09-09T07:04:07.001Z"
+  }
+]

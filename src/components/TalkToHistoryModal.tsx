@@ -37,7 +37,7 @@ const HISTORICAL_FIGURES: Figure[] = [
     titleEn: 'Queen of Jhansi & Revolutionary Leader',
     titleHi: 'झांसी की रानी एवं महान क्रांतीकारी',
     era: '1828 – 1858 AD',
-    avatar: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=200&auto=format&fit=crop',
+    avatar: 'https://images.unsplash.com/photo-1590402494587-44b71d7772f6?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'I stand atop Jhansi ramparts. Speak swiftly—the cannons are being primed, but I shall hear your voice.',
     greetingHi: 'मैं झांसी के प्राचीर पर खड़ी हूं। शीघ्र कहें—तोपें तैयार की जा रही हैं, पर मैं आपकी बात सुनूंगी।',
   },

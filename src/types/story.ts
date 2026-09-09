@@ -5,10 +5,6 @@ export interface HistoricalScene {
   narration: string;
   imagePrompt: string;
   ambientTag: string;
-  // Evidence classification fields
-  historicalFact?: string;
-  reconstructionNote?: string;
-  simulationNote?: string;
 }
 
 export interface GenerateStoryRequest {
@@ -16,10 +12,20 @@ export interface GenerateStoryRequest {
   language?: string;
 }
 
+export interface HistoricalKnowledgeContext {
+  title: string;
+  description?: string;
+  extract: string;
+  thumbnail_url?: string | null;
+  page_url?: string;
+  era?: string;
+  source?: string;
+}
+
 export interface GenerateStoryResponse {
   scenes: HistoricalScene[];
-  source: 'gemini-api' | 'fallback' | 'demo' | 'supabase-cache';
-  experienceId?: string | null;
+  source: 'gemini-api' | 'fallback' | 'demo';
+  wikiContext?: HistoricalKnowledgeContext;
   warning?: string;
   error?: string;
 }

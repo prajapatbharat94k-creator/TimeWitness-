@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -19,11 +18,11 @@ import {
   ChevronRight, 
   Radio, 
   Wand2, 
-  Beaker 
+  Beaker,
+  BookOpen,
+  ExternalLink
 } from 'lucide-react';
-import EvidenceTag from './EvidenceTag';
-import SourcesPanel from './SourcesPanel';
-import { HistoricalScene } from '@/types/story';
+import { HistoricalScene, HistoricalKnowledgeContext } from '@/types/story';
 import AmbientAudioPlayer from './AmbientAudioPlayer';
 import ShareExportPanel from './ShareExportPanel';
 
@@ -35,73 +34,20 @@ interface ScenePlaceholderProps {
   onOpenTalkToHistory: (figure?: string) => void;
   /** Data source — 'gemini-api' | 'demo' | 'fallback' */
   source?: string;
+  wikiContext?: HistoricalKnowledgeContext | null;
   isMuted: boolean;
   onToggleMute: () => void;
   onToastSuccess: (msg: string) => void;
   onToastError: (msg: string) => void;
 }
 
-const THEME_IMAGES: Record<string, string[]> = {
-  shivaji: [
-    'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-  ],
-  lakshmibai: [
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-  ],
-  waterloo: [
-    'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
-  ],
-  cleopatra: [
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
-  ],
-  gandhi: [
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
-  ],
-  apollo: [
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1200&auto=format&fit=crop',
-  ],
-};
-
-function getSceneImage(query: string, sceneIdx: number): string {
-  const q = (query || '').toLowerCase();
-  let list = THEME_IMAGES.shivaji;
-  if (q.includes('apollo') || q.includes('armstrong') || q.includes('moon') || q.includes('lunar') || q.includes('space') || q.includes('nasa')) {
-    list = THEME_IMAGES.apollo;
-  } else if (q.includes('gandhi') || q.includes('dandi') || q.includes('salt march')) {
-    list = THEME_IMAGES.gandhi;
-  } else if (q.includes('cleopatra') || q.includes('egypt') || q.includes('pharaoh') || q.includes('alexandria')) {
-    list = THEME_IMAGES.cleopatra;
-  } else if (q.includes('waterloo') || q.includes('napoleon') || q.includes('bonaparte')) {
-    list = THEME_IMAGES.waterloo;
-  } else if (q.includes('lakshmibai') || q.includes('jhansi') || q.includes('1857')) {
-    list = THEME_IMAGES.lakshmibai;
-  }
-  return list[sceneIdx % list.length];
-}
+const DEFAULT_IMAGES = [
+  'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1590402494587-44b71d7772f6?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+];
 
 export default function ScenePlaceholder({ 
   currentLang, 
@@ -110,6 +56,7 @@ export default function ScenePlaceholder({
   isLoading, 
   onOpenTalkToHistory,
   source,
+  wikiContext,
   isMuted,
   onToggleMute,
   onToastSuccess,
@@ -117,19 +64,11 @@ export default function ScenePlaceholder({
 }: ScenePlaceholderProps) {
   const [activeSceneIdx, setActiveSceneIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [isPlayingAmbient, setIsPlayingAmbient] = useState(false);
-
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     setActiveSceneIdx(0);
     // Auto-pause audio when a new story loads
     setIsPlayingAudio(false);
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
   }, [scenes]);
 
   const currentScene = scenes[activeSceneIdx] || null;
@@ -158,68 +97,6 @@ export default function ScenePlaceholder({
       }
     };
   }, [isPlayingAudio, currentScene, currentLang]);
-
-  // Ambient sound synthesizer using Web Audio API
-  const toggleAmbientSound = () => {
-    if (typeof window === 'undefined') return;
-
-    if (isPlayingAmbient) {
-      if (gainNodeRef.current && audioContextRef.current) {
-        gainNodeRef.current.gain.setTargetAtTime(0, audioContextRef.current.currentTime, 0.2);
-        setTimeout(() => {
-          oscillatorRef.current?.stop();
-          oscillatorRef.current?.disconnect();
-          setIsPlayingAmbient(false);
-        }, 250);
-      } else {
-        setIsPlayingAmbient(false);
-      }
-      return;
-    }
-
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = audioContextRef.current || new AudioCtx();
-      audioContextRef.current = ctx;
-
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const biquad = ctx.createBiquadFilter();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(110, ctx.currentTime);
-      biquad.type = 'lowpass';
-      biquad.frequency.setValueAtTime(320, ctx.currentTime);
-
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.6);
-
-      osc.connect(biquad);
-      biquad.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      oscillatorRef.current = osc;
-      gainNodeRef.current = gain;
-      setIsPlayingAmbient(true);
-    } catch (e) {
-      console.warn('Web Audio ambient playback error:', e);
-      setIsPlayingAmbient(false);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      oscillatorRef.current?.stop();
-      oscillatorRef.current?.disconnect();
-      audioContextRef.current?.close();
-    };
-  }, []);
 
   return (
     <section id="scene-viewer" className="w-full max-w-6xl mx-auto px-4 pb-20 relative z-10">
@@ -254,6 +131,20 @@ export default function ScenePlaceholder({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Wikipedia Archive Badge */}
+              {wikiContext && (
+                <a
+                  href={wikiContext.page_url || `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiContext.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-400/30 text-[11px] font-medium text-blue-300 hover:bg-blue-500/20 transition-all"
+                  title="Verified with Wikipedia Historical Archive & Supabase Cache"
+                >
+                  <BookOpen className="w-3 h-3 text-blue-400" />
+                  <span>Wikipedia: {wikiContext.title}</span>
+                  <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                </a>
+              )}
               {/* Demo Mode Badge */}
               {isDemoMode && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-[11px] font-bold text-amber-400">
@@ -400,10 +291,11 @@ export default function ScenePlaceholder({
                     transition={{ duration: 0.25 }}
                     className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
                   >
+                    
                     {/* Left Column: Visual Artwork Frame */}
                     <div className="lg:col-span-6 relative group rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl aspect-video bg-[#14141C]">
                       <Image
-                        src={getSceneImage(searchQuery, activeSceneIdx)}
+                        src={DEFAULT_IMAGES[activeSceneIdx % DEFAULT_IMAGES.length]}
                         alt={currentScene.title}
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
@@ -486,21 +378,6 @@ export default function ScenePlaceholder({
                         </p>
                       </div>
 
-                      {/* Evidence Classification Badges */}
-                      {(currentScene.historicalFact || currentScene.reconstructionNote || currentScene.simulationNote) && (
-                        <div className="flex flex-col gap-2 pt-1">
-                          {currentScene.historicalFact && (
-                            <EvidenceTag type="fact" text={currentScene.historicalFact} />
-                          )}
-                          {currentScene.reconstructionNote && (
-                            <EvidenceTag type="reconstruction" text={currentScene.reconstructionNote} />
-                          )}
-                          {currentScene.simulationNote && (
-                            <EvidenceTag type="simulation" text={currentScene.simulationNote} />
-                          )}
-                        </div>
-                      )}
-
                       {/* Navigation Controls */}
                       <div className="flex items-center justify-between pt-2 gap-2">
                         <button
@@ -551,11 +428,6 @@ export default function ScenePlaceholder({
 
                   </motion.div>
                 </AnimatePresence>
-
-                {/* Primary & Academic Sources Panel */}
-                <div className="pt-2">
-                  <SourcesPanel topic={searchQuery} />
-                </div>
 
                 {/* Share & Export Panel — visible on last scene */}
                 {isOnLastScene && (
