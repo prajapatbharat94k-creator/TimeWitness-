@@ -41,11 +41,17 @@ Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's offi
   3. *The Defining Climax & Siege* (चरम मोड़ और धर्मयुद्ध)
   4. *Sovereign Victory & Triumph* (महान विजय और राज्याभिषेक)
   5. *Immortal Legacy & Eternal Impact* (अमर विरासत और शाश्वत प्रभाव)
-- 🌐 **Full Bilingual Support**: Instant real-time toggle between **English** and **Hindi**, updating the interface, tone, and generated primary source narrations.
-- 💬 **Talk to History Modal**: Engage in direct conversational dialogues with verified historical personas with period-accurate dialect, greetings, and wisdom.
-- ⚡ **Structured AI Responses via Gemini 2.5 Flash**: Employs `@google/genai` with structured JSON schema output to guarantee reliable, high-speed scene rendering.
-- 🛡️ **Resilient Fallback Mode**: If an API key is omitted or rate limits occur, the built-in deterministic historical generator ensures an uninterrupted demonstration.
-- 🎨 **Cinematic Imperial Aesthetic**: Designed with deep obsidian backgrounds, imperial gold gradients, frosted glassmorphism, and elegant *Cinzel* typography.
+- 🌏 **Dual Historical Universe (Indian & World History)**:
+  - **10 Indian Eras**: Ancient India, Mauryan, Gupta, Medieval, Delhi Sultanate, Mughal, Maratha, Colonial, Independence, Modern India.
+  - **16 World Eras**: Egypt, Greece, Rome, Medieval Europe, Renaissance, French Revolution, Napoleonic, Industrial, WWI, WWII, Cold War, Space Race, China, Mongol, Ottoman, Mesoamerica.
+- 🧭 **Explore Discovery Hub (`/explore`)**: Filter by 9 world regions (India, Asia, Europe, Africa, Americas, Middle East, Ancient/Modern World) and 5 chronological epochs.
+- 📜 **Dedicated Witnessing Chamber (`/witness`)**: Full immersion with SpeechSynthesis TTS narration, ambient soundscape player, Wikipedia encyclopedic context card, and shareable dossier link.
+- 🔍 **Global Universal Search (`/search`)**: Real-time integration with `/api/wiki-history` and Supabase Postgres, type filters, recent searches, and popular suggestions.
+- 📊 **Chronicler Dashboard (`/dashboard`)**: Saved historical journeys, persistent viewing history, scholar rank tracking, and research metrics.
+- 👤 **Scholar Profile & System Settings (`/profile`, `/settings`)**: Customizable chronicler identity, acoustic synthesis preferences, and local data control.
+- 💬 **Interactive Talk to History**: Engage in primary-perspective dialogue with verified historical personas (Chhatrapati Shivaji Maharaj, Rani Lakshmibai, Napoleon Bonaparte, Cleopatra VII, Mahatma Gandhi, Neil Armstrong).
+- 🌐 **Full Bilingual Parity**: Real-time toggle between **English** and **Hindi (हिन्दी)** across all pages and narrations.
+- 🎨 **Cinematic Museum Aesthetic**: Obsidian backgrounds, warm imperial gold accents, Cinzel typography, and subtle borders.
 
 ---
 
@@ -58,6 +64,7 @@ Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's offi
 | **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) & [tailwind-merge](https://www.npmjs.com/package/tailwind-merge) |
 | **Animations** | [Framer Motion 11](https://www.framer.com/motion/) |
 | **AI SDK** | [`@google/genai`](https://www.npmjs.com/package/@google/genai) (`gemini-2.0-flash`) |
+| **Database** | [Supabase](https://supabase.com/) (PostgreSQL with Wikipedia knowledge cache) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
 
 ---
@@ -69,23 +76,38 @@ TimeWitness/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   └── generate-story/
-│   │   │       └── route.ts           # Gemini 2.5 Flash API endpoint with JSON Schema
-│   │   ├── globals.css                # Custom theme variables, gold glow, & glassmorphism
-│   │   ├── layout.tsx                 # Root layout with Cinzel & Inter Google fonts
-│   │   └── page.tsx                   # Main timeline page orchestrator
-│   └── components/
-│       ├── HeroSection.tsx            # Hero banner with dynamic archival stats & badge
-│       ├── Navbar.tsx                 # Navigation bar & English / Hindi language toggle
-│       ├── ScenePlaceholder.tsx       # 5-scene timeline cards & atmospheric audio tags
-│       ├── SearchBar.tsx              # Historical search & suggested exploration tags
-│       └── TalkToHistoryModal.tsx     # Interactive historical persona dialogue modal
-├── .env.example                       # Environment variable template
-├── next.config.js                     # Next.js configuration
-├── package.json                       # Project manifest and scripts
-├── tailwind.config.js                 # Custom gold palette, typography, & keyframes
-└── tsconfig.json                      # TypeScript configuration
-```
+│   │   │   ├── generate-story/        # Gemini 2.0 Flash 5-scene generator
+│   │   │   ├── talk-to-history/       # Persona conversational AI endpoint
+│   │   │   └── wiki-history/          # Encyclopedic archive endpoint
+│   │   ├── explore/page.tsx           # Global discovery portal (India & World)
+│   │   ├── witness/page.tsx           # Dedicated 5-scene historical witness chamber
+│   │   ├── experience/[id]/page.tsx   # Deep-linked historical dossiers
+│   │   ├── search/page.tsx            # Global universal search with type filters
+│   │   ├── dashboard/page.tsx         # Chronicler dashboard & bookmarks
+│   │   ├── profile/page.tsx           # Scholar profile & title credentials
+│   │   ├── settings/page.tsx          # Audio speed & cache settings
+│   │   ├── how-it-works/page.tsx      # Archival engineering methodology
+│   │   ├── about/page.tsx             # Mission & archival ethics
+│   │   ├── privacy/page.tsx           # Privacy policy
+│   │   ├── terms/page.tsx             # Terms of service
+│   │   ├── globals.css                # Imperial theme, gold glow, & glassmorphism
+│   │   ├── layout.tsx                 # Root layout with AppShell & font providers
+│   │   └── page.tsx                   # Main cinematic landing page
+│   ├── components/
+│   │   ├── AppShell.tsx               # Layout shell with Navbar, Footer & Talk modal
+│   │   ├── Navbar.tsx                 # Responsive global header & mobile drawer
+│   │   ├── Footer.tsx                 # Museum-grade footer links
+│   │   ├── HeroSection.tsx            # Dual CTAs & dynamic statistics
+│   │   ├── ScenePlaceholder.tsx       # 5-scene timeline cards & atmospheric audio
+│   │   ├── SearchBar.tsx              # Historical search & suggested exploration tags
+│   │   ├── TalkToHistoryModal.tsx     # Interactive historical persona dialogue modal
+│   │   └── AmbientAudioPlayer.tsx     # Procedural acoustic soundscapes
+│   ├── context/
+│   │   └── AppContext.tsx             # Global state (language, mute, bookmarks, profile)
+│   └── data/
+│       ├── historicalCatalog.ts       # Indian & World categories, epochs, experiences
+│       └── sampleStories.ts           # Curated primary source demo storylines
+
 
 ---
 

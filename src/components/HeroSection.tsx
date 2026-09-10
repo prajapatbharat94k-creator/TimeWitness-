@@ -103,6 +103,27 @@ export default function HeroSection({ currentLang }: HeroSectionProps) {
           </div>
         </motion.div>
 
+        {/* Hero Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="flex flex-wrap items-center justify-center gap-3 pt-2"
+        >
+          <a
+            href="/witness"
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#B89628] text-black font-cinzel font-bold text-xs sm:text-sm tracking-wide shadow-gold-glow hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <span>{currentLang === 'EN' ? 'Start Witnessing' : 'साक्षी बनना शुरू करें'}</span>
+          </a>
+          <a
+            href="/explore"
+            className="px-6 py-3.5 rounded-2xl bg-[#14141C] border border-[#242434] hover:border-[#D4AF37]/50 text-[#CBD5E1] hover:text-white text-xs sm:text-sm font-medium transition-all flex items-center gap-2"
+          >
+            <span>{currentLang === 'EN' ? 'Explore Global History' : 'इतिहास अन्वेषण'}</span>
+          </a>
+        </motion.div>
+
       </div>
     </section>
   );
