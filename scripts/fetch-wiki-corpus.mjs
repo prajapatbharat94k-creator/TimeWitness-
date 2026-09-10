@@ -6,15 +6,23 @@ import { createClient } from '@supabase/supabase-js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+// SECURITY: Read credentials from environment only — never hardcode keys here.
+// Set these in your shell before running this script:
+//   $env:NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+//   $env:SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('Error: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY environment variables must be set.')
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error(
+    'Error: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY ' +
+    'environment variables must be set before running this script.\n' +
+    'These are server-side only — never commit them to source control.'
+  )
   process.exit(1)
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY)
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 const HISTORICAL_TOPICS = [
   { slug: 'shivaji-maharaj', title: 'Shivaji', era: '1630–1680 AD', tags: ['maratha', 'swarajya', 'shivaji', 'raigad'] },

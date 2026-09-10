@@ -5,6 +5,12 @@ export interface HistoricalScene {
   narration: string;
   imagePrompt: string;
   ambientTag: string;
+  /** Verified historical fact for this scene (📜 HISTORICAL FACT label) */
+  historicalFact?: string;
+  /** AI reconstruction disclaimer (🎭 AI RECONSTRUCTION label) */
+  reconstructionNote?: string;
+  /** Alternate-history simulation note (🔮 SIMULATION label) */
+  simulationNote?: string;
 }
 
 export interface GenerateStoryRequest {
