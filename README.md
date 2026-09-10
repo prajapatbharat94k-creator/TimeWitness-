@@ -12,6 +12,12 @@
   <img src="https://img.shields.io/badge/Supabase-Database-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
+<p align="center">
+  <a href="https://timewitness-tau.vercel.app">
+    <img src="https://img.shields.io/badge/🌐%20Live%20Demo-timewitness--tau.vercel.app-D4AF37?style=for-the-badge" alt="Live Demo" />
+  </a>
+</p>
+
 ---
 
 ## 📖 Overview
