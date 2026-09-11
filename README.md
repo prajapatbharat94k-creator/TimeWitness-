@@ -55,17 +55,68 @@ Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's offi
 
 ---
 
+## 🏛️ System Architecture
+
+```text
+                               ┌─────────────────────────────────────────┐
+                               │           User Browser / Client         │
+                               │  (Next.js 14 App Router & React 18)     │
+                               └────────────────────┬────────────────────┘
+                                                    │
+                 ┌──────────────────────────────────┼──────────────────────────────────┐
+                 ▼                                  ▼                                  ▼
+      ┌──────────────────────┐           ┌──────────────────────┐           ┌──────────────────────┐
+      │   Bilingual TTS      │           │   Atmospheric Sound  │           │   Chronicler State   │
+      │   SpeechSynthesis    │           │   Web Audio Engine   │           │   LocalStorage Sync  │
+      └──────────────────────┘           └──────────────────────┘           └──────────────────────┘
+                                                    │
+                                                    ▼
+                               ┌─────────────────────────────────────────┐
+                               │           Next.js API Gateway           │
+                               │        (Edge & Server Routes)           │
+                               └────────────────────┬────────────────────┘
+                                                    │
+                 ┌──────────────────────────────────┴──────────────────────────────────┐
+                 ▼                                                                     ▼
+   ┌───────────────────────────┐                                         ┌───────────────────────────┐
+   │    Google Gemini SDK      │                                         │    Archival Knowledge     │
+   │   (@google/genai 2.21)    │                                         │          Router           │
+   └─────────────┬─────────────┘                                         └─────────────┬─────────────┘
+                 │                                                                     │
+     ┌───────────┴───────────┐                                           ┌─────────────┴─────────────┐
+     ▼                       ▼                                           ▼                           ▼
+┌──────────────┐     ┌──────────────┐                             ┌──────────────┐           ┌──────────────┐
+│ 5-Scene Gen  │     │ Talk-to-Hist │                             │  Supabase DB │           │  Wikipedia   │
+│ Engine (2.0) │     │ Persona Chat │                             │  (PG Cache)  │           │  REST API    │
+└──────────────┘     └──────────────┘                             └──────────────┘           └──────────────┘
+```
+
+---
+
 ## 🛠️ Tech Stack
 
-| Category | Technology |
-|---|---|
-| **Framework** | [Next.js 14](https://nextjs.org/) (App Router, Server & Client Components) |
-| **Language** | [TypeScript 5](https://www.typescriptlang.org/) |
-| **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) & [tailwind-merge](https://www.npmjs.com/package/tailwind-merge) |
-| **Animations** | [Framer Motion 11](https://www.framer.com/motion/) |
-| **AI SDK** | [`@google/genai`](https://www.npmjs.com/package/@google/genai) (`gemini-2.0-flash`) |
-| **Database** | [Supabase](https://supabase.com/) (PostgreSQL with Wikipedia knowledge cache) |
-| **Icons** | [Lucide React](https://lucide.dev/) |
+| Category | Technology | Description |
+|---|---|---|
+| **Framework** | [Next.js 14](https://nextjs.org/) | App Router, Server Components & Route Handlers |
+| **Language** | [TypeScript 5](https://www.typescriptlang.org/) | Strict type safety and unified interfaces |
+| **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) | Imperial gold palette, obsidian theme & custom utility classes |
+| **Motion** | [Framer Motion 11](https://www.framer.com/motion/) | Smooth card transitions, scene step animations & modal physics |
+| **AI SDK** | [`@google/genai`](https://www.npmjs.com/package/@google/genai) | Official Google SDK running `gemini-2.0-flash` |
+| **Database** | [Supabase](https://supabase.com/) | PostgreSQL knowledge base with Row Level Security |
+| **Acoustics** | Web Audio & SpeechSynthesis | Native browser TTS narration & procedural ambient soundscapes |
+| **Icons** | [Lucide React](https://lucide.dev/) | Consistent, clean visual iconography |
+
+---
+
+## 📡 API Endpoints
+
+TimeWitness provides server-side endpoints designed with strict JSON validation and offline fallbacks:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/generate-story` | `POST` | Generates a sequential 5-scene historical narrative arc with visual prompts and audio tags using Gemini 2.0 Flash. |
+| `/api/talk-to-history` | `POST` | Engages in first-person historical dialogue with validated personas (Shivaji Maharaj, Rani Lakshmibai, Napoleon, etc.). |
+| `/api/wiki-history` | `GET` | Fetches encyclopedic summaries and images from Supabase or live Wikipedia archives. |
 
 ---
 
@@ -73,6 +124,9 @@ Powered by Next.js 14 App Router, Tailwind CSS, Framer Motion, and Google's offi
 
 ```text
 TimeWitness/
+├── public/                    # Static audio, logos, and icon assets
+├── scripts/
+│   └── fetch-wiki-corpus.mjs  # CLI utility to pre-populate historical knowledge cache
 ├── src/
 │   ├── app/
 │   │   ├── api/
@@ -104,10 +158,18 @@ TimeWitness/
 │   │   └── AmbientAudioPlayer.tsx     # Procedural acoustic soundscapes
 │   ├── context/
 │   │   └── AppContext.tsx             # Global state (language, mute, bookmarks, profile)
-│   └── data/
-│       ├── historicalCatalog.ts       # Indian & World categories, epochs, experiences
-│       └── sampleStories.ts           # Curated primary source demo storylines
-
+│   ├── data/
+│   │   ├── historicalCatalog.ts       # Indian & World categories, epochs, experiences
+│   │   └── sampleStories.ts           # Curated primary source demo storylines
+│   ├── lib/
+│   │   └── supabase.ts                # Resilient Supabase client with offline fallback
+│   └── utils/
+│       └── supabase/                  # Server, client, admin, and wiki service utilities
+├── supabase/
+│   └── schema.sql                     # Supabase database schema & RLS policies
+├── .env.example                       # Environment variables template
+└── README.md                          # Project documentation
+```
 
 ---
 
@@ -115,9 +177,10 @@ TimeWitness/
 
 ### 1. Prerequisites
 
-- **Node.js**: Version 18.x or later (recommended Node 20+)
-- **npm** or **yarn** / **pnpm**
-- A **Google Gemini API Key** (optional for basic demo, recommended for custom generation): [Get API Key here](https://aistudio.google.com/)
+- **Node.js**: Version 18.x or later (recommended Node 20.x+)
+- **npm** (v9+), **pnpm**, or **yarn**
+- **Google Gemini API Key**: [Get a free key here](https://aistudio.google.com/app/apikey)
+- **Supabase Project** *(optional)*: [Create a free Supabase project](https://supabase.com/)
 
 ### 2. Installation
 
@@ -134,30 +197,38 @@ npm install
 
 ### 3. Environment Setup
 
-Create a `.env.local` file from the example template:
+Create your `.env.local` configuration file:
 ```bash
 cp .env.example .env.local
 ```
 
-Open `.env.local` and add your Gemini API key:
+Configure your environment variables in `.env.local`:
+
 ```env
+# ── Google Gemini API Key (Required for dynamic AI generation) ──
 GEMINI_API_KEY=your_gemini_api_key_here
+
+# ── Supabase Credentials (Optional — enables cloud knowledge caching) ──
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 ```
 
-> **Note:** If no API key is set, the application operates in **Resilient Fallback Mode** with curated default historical scenarios.
+> **Note on Resilient Fallback Mode:**
+> If `GEMINI_API_KEY` or `SUPABASE` keys are not provided, TimeWitness automatically runs in **Offline Resilient Mode**, loading verified historical dossiers and sample storylines directly from internal archives without crashing.
 
 ### 4. Running Locally
 
-Start the local development server:
+Start the local Next.js development server:
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your web browser to explore TimeWitness.
 
-### 5. Production Build
+### 5. Build & Production
 
-To test the production build:
+To verify TypeScript types and generate an optimized production bundle:
 ```bash
 npm run build
 npm run start
