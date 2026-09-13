@@ -5,35 +5,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Film, 
-  Volume2, 
-  VolumeX, 
-  Play, 
-  Pause, 
-  Sparkles, 
-  Clock, 
-  MessageCircle, 
-  RefreshCw, 
-  Eye, 
-  ChevronLeft, 
-  ChevronRight, 
-  Radio, 
-  Wand2, 
-  Beaker 
+  Film, Volume2, VolumeX, Play, Pause, Sparkles, Clock, MessageCircle, 
+  RefreshCw, ChevronLeft, ChevronRight, ArrowLeft, Maximize, MapPin, 
+  Calendar, Save, Heart, Share2, BookOpen, AlertTriangle, ShieldCheck,
+  Globe2, Video, ImageIcon
 } from 'lucide-react';
 import EvidenceTag from './EvidenceTag';
 import SourcesPanel from './SourcesPanel';
 import { HistoricalScene } from '@/types/story';
 import AmbientAudioPlayer from './AmbientAudioPlayer';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { toggleSaved, toggleFavorite, recordUserHistory, ExperienceCardData } from '@/lib/db';
+import { isUserFavorited, isUserSaved, buildId } from '@/lib/localStorage';
+import AuthPrompt from './AuthPrompt';
+import WhatIfModal from './WhatIfModal';
 import ShareExportPanel from './ShareExportPanel';
 
 interface ScenePlaceholderProps {
-  currentLang: 'EN' | 'HI';
   searchQuery: string;
   scenes: HistoricalScene[];
+  experienceId?: string | null;
   isLoading: boolean;
   onOpenTalkToHistory: (figure?: string) => void;
-  /** Data source — 'gemini-api' | 'demo' | 'fallback' */
   source?: string;
   isMuted: boolean;
   onToggleMute: () => void;
@@ -103,10 +97,12 @@ function getSceneImage(query: string, sceneIdx: number): string {
   return list[sceneIdx % list.length];
 }
 
+const TIMELINE_LABELS = ['ORIGIN', 'RISE', 'DEFINING MOMENT', 'TURNING POINT', 'LEGACY'];
+
 export default function ScenePlaceholder({ 
-  currentLang, 
   searchQuery, 
   scenes, 
+  experienceId,
   isLoading, 
   onOpenTalkToHistory,
   source,
@@ -115,36 +111,105 @@ export default function ScenePlaceholder({
   onToastSuccess,
   onToastError,
 }: ScenePlaceholderProps) {
+  const { user } = useAuth();
+  const { t, languageInfo } = useLanguage();
   const [activeSceneIdx, setActiveSceneIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [isPlayingAmbient, setIsPlayingAmbient] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [loadingStepIdx, setLoadingStepIdx] = useState(0);
+  const [isWhatIfOpen, setIsWhatIfOpen] = useState(false);
 
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
+  const loadingSteps = [
+    'Researching historical context...',
+    'Verifying historical primary sources...',
+    'Synthesizing evidence and chronology...',
+    'Constructing witness scenes...',
+    'Preparing your historical experience...',
+  ];
 
   useEffect(() => {
+    if (!isLoading) {
+      setLoadingStepIdx(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingStepIdx((prev) => (prev + 1) % loadingSteps.length);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [isLoading, loadingSteps.length]);
+  
+  // Media states
+  const [mediaType, setMediaType] = useState<'video' | 'image' | 'fallback'>('image');
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard navigation for scenes & spacebar for narration audio
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (scenes.length === 0) return;
+
+      if (e.key === 'ArrowRight') {
+        setActiveSceneIdx((prev) => Math.min(scenes.length - 1, prev + 1));
+        setIsPlayingAudio(false);
+      } else if (e.key === 'ArrowLeft') {
+        setActiveSceneIdx((prev) => Math.max(0, prev - 1));
+        setIsPlayingAudio(false);
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        setIsPlayingAudio((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scenes.length]);
+  
+  useEffect(() => {
     setActiveSceneIdx(0);
-    // Auto-pause audio when a new story loads
     setIsPlayingAudio(false);
+    setMediaType('image'); // Default to cinematic imagery
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-  }, [scenes]);
+
+    if (scenes && scenes.length > 0 && searchQuery) {
+      const effectiveId = experienceId || buildId(searchQuery, languageInfo.code);
+      const cardData: ExperienceCardData = {
+        id: effectiveId,
+        title: scenes[0]?.title || searchQuery,
+        subject: searchQuery,
+        year: scenes[0]?.era || undefined,
+        cover_image: scenes[0]?.imagePrompt || undefined,
+        slug: effectiveId,
+        progress: 20,
+      };
+
+      // Check current favorited & saved status
+      setIsFavorited(isUserFavorited(effectiveId, user?.id));
+      setIsSaved(isUserSaved(effectiveId, user?.id));
+
+      // Record to history
+      recordUserHistory(user ? user.id : null, effectiveId, cardData);
+    } else {
+      setIsSaved(false);
+      setIsFavorited(false);
+    }
+  }, [scenes, searchQuery, experienceId, user, languageInfo.code]);
 
   const currentScene = scenes[activeSceneIdx] || null;
-  const isOnLastScene = activeSceneIdx === scenes.length - 1 && scenes.length === 5;
-  const isDemoMode = source === 'demo';
-  const isFallback = source === 'fallback';
 
-  // Real narration speech playback using Web Speech API
+  // Real narration speech playback using Web Speech API with dynamic language mapping
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       if (isPlayingAudio && currentScene) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(currentScene.narration);
-        utterance.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+        utterance.lang = languageInfo.ttsLocale;
         utterance.rate = 0.92;
+        utterance.volume = isMuted ? 0 : 1;
         utterance.onend = () => setIsPlayingAudio(false);
         utterance.onerror = () => setIsPlayingAudio(false);
         window.speechSynthesis.speak(utterance);
@@ -157,74 +222,185 @@ export default function ScenePlaceholder({
         window.speechSynthesis.cancel();
       }
     };
-  }, [isPlayingAudio, currentScene, currentLang]);
+  }, [isPlayingAudio, currentScene, languageInfo.ttsLocale, isMuted]);
 
-  // Ambient sound synthesizer using Web Audio API
-  const toggleAmbientSound = () => {
-    if (typeof window === 'undefined') return;
-
-    if (isPlayingAmbient) {
-      if (gainNodeRef.current && audioContextRef.current) {
-        gainNodeRef.current.gain.setTargetAtTime(0, audioContextRef.current.currentTime, 0.2);
-        setTimeout(() => {
-          oscillatorRef.current?.stop();
-          oscillatorRef.current?.disconnect();
-          setIsPlayingAmbient(false);
-        }, 250);
-      } else {
-        setIsPlayingAmbient(false);
-      }
+  // Actions
+  const handleSave = async () => {
+    if (!user) {
+      setAuthPromptOpen(true);
       return;
     }
+    
+    const effectiveId = experienceId || buildId(searchQuery, languageInfo.code);
+    const cardData: ExperienceCardData = {
+      id: effectiveId,
+      title: scenes[0]?.title || searchQuery,
+      subject: searchQuery,
+      year: scenes[0]?.era || undefined,
+      cover_image: scenes[0]?.imagePrompt || undefined,
+      slug: effectiveId,
+      progress: Math.round(((activeSceneIdx + 1) / Math.max(scenes.length, 1)) * 100),
+    };
 
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = audioContextRef.current || new AudioCtx();
-      audioContextRef.current = ctx;
-
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const biquad = ctx.createBiquadFilter();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(110, ctx.currentTime);
-      biquad.type = 'lowpass';
-      biquad.frequency.setValueAtTime(320, ctx.currentTime);
-
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.6);
-
-      osc.connect(biquad);
-      biquad.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      oscillatorRef.current = osc;
-      gainNodeRef.current = gain;
-      setIsPlayingAmbient(true);
-    } catch (e) {
-      console.warn('Web Audio ambient playback error:', e);
-      setIsPlayingAmbient(false);
+    if (isSaved) {
+      await toggleSaved(user.id, effectiveId, false, cardData);
+      setIsSaved(false);
+      onToastSuccess(t('removedFromSaved'));
+    } else {
+      await toggleSaved(user.id, effectiveId, true, cardData);
+      setIsSaved(true);
+      onToastSuccess(t('savedSuccessfully'));
     }
   };
 
-  useEffect(() => {
-    return () => {
-      oscillatorRef.current?.stop();
-      oscillatorRef.current?.disconnect();
-      audioContextRef.current?.close();
+  const handleFavorite = async () => {
+    if (!user) {
+      setAuthPromptOpen(true);
+      return;
+    }
+    
+    const effectiveId = experienceId || buildId(searchQuery, languageInfo.code);
+    const cardData: ExperienceCardData = {
+      id: effectiveId,
+      title: scenes[0]?.title || searchQuery,
+      subject: searchQuery,
+      year: scenes[0]?.era || undefined,
+      cover_image: scenes[0]?.imagePrompt || undefined,
+      slug: effectiveId,
+      progress: Math.round(((activeSceneIdx + 1) / Math.max(scenes.length, 1)) * 100),
     };
+
+    if (isFavorited) {
+      await toggleFavorite(user.id, effectiveId, false, cardData);
+      setIsFavorited(false);
+      onToastSuccess('Removed from favorites.');
+    } else {
+      await toggleFavorite(user.id, effectiveId, true, cardData);
+      setIsFavorited(true);
+      onToastSuccess(t('addedToFavorites'));
+    }
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/?witness=${encodeURIComponent(searchQuery)}` : '';
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `TimeWitness: ${searchQuery}`,
+          text: `Experience the historical journey of ${searchQuery}`,
+          url: url,
+        });
+      } catch (err) {
+        // user cancelled or failed
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      onToastSuccess(t('linkCopied'));
+    }
+  };
+
+  const scrollToEvidence = () => {
+    const el = document.getElementById('evidence-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const scrollToContext = () => {
+    const el = document.getElementById('context-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      playerRef.current?.requestFullscreen().catch(err => {
+        onToastError(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
+  // Media loading handlers
+  const handleVideoError = () => {
+    setMediaType('image');
+  };
+
+  const handleImageError = () => {
+    setMediaType('fallback');
+  };
+
+  if (!isLoading && scenes.length === 0) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-4 pb-20">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="py-12 px-4 text-center flex flex-col items-center justify-center max-w-2xl mx-auto"
+        >
+          <div className="relative w-24 h-24 rounded-full bg-[#14141C] border border-[#D4AF37]/30 flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(212,175,55,0.15)]">
+            <Film className="w-10 h-10 text-[#D4AF37] animate-pulse-slow" />
+            <Sparkles className="w-5 h-5 text-[#FFF3C4] absolute -top-1 -right-1 animate-spin-slow" />
+          </div>
+          <h3 className="font-cinzel text-3xl font-bold text-[#F8FAFC] mb-4">
+            {t('awaitingCoordinates')}
+          </h3>
+          <p className="text-[#94A3B8] leading-relaxed mb-8 max-w-md mx-auto">
+            {t('awaitingDesc')}
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-4 pb-20">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="py-20 px-4 text-center flex flex-col items-center justify-center max-w-xl mx-auto"
+        >
+          <div className="relative w-20 h-20 mb-8 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-[3px] border-t-[#D4AF37] border-r-transparent border-b-[#D4AF37]/30 border-l-transparent animate-spin" />
+            <RefreshCw className="w-8 h-8 text-[#D4AF37] animate-pulse" />
+          </div>
+          <h3 className="font-cinzel text-2xl font-bold text-[#FFF3C4] mb-3">
+            {t('reconstructing')}
+          </h3>
+          <p className="text-sm text-[#D4AF37] font-mono mb-8 opacity-90 transition-all duration-300">
+            {loadingSteps[loadingStepIdx]}
+          </p>
+          <div className="w-full h-2 rounded-full bg-[#1B1B26] overflow-hidden border border-[#242434]">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-[#B89220] via-[#D4AF37] to-[#FFF3C4]" 
+              animate={{ width: `${Math.min(95, 20 + loadingStepIdx * 20)}%` }} 
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+            />
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const metaYear = currentScene?.era.match(/\d{3,4}/)?.[0] || '1674';
+  const metaLocation = currentScene?.era.includes('Maratha') ? 'Raigad, India' : (currentScene?.era.includes('Waterloo') ? 'Waterloo, Europe' : 'Historical Region');
+  const metaRegion = currentScene?.era || 'Global History';
+
   return (
-    <section id="scene-viewer" className="w-full max-w-6xl mx-auto px-4 pb-20 relative z-10">
+    <section id="scene-viewer" className="w-full max-w-7xl mx-auto px-4 sm:px-6 pb-20 relative z-10">
       
-      {/* Ambient Audio (invisible, purely functional) */}
       {currentScene && (
         <AmbientAudioPlayer
           ambientTag={currentScene.ambientTag}
@@ -233,367 +409,266 @@ export default function ScenePlaceholder({
         />
       )}
 
-      {/* Outer Golden Border Frame */}
-      <div className="relative rounded-3xl p-px bg-gradient-to-b from-[#D4AF37]/40 via-[#242434] to-[#14141C] shadow-2xl">
-        <div className="rounded-[23px] bg-[#0D0D11] p-4 sm:p-6 md:p-8 min-h-[500px] flex flex-col justify-between relative overflow-hidden">
-          
-          {/* Subtle Ambient Grid in background */}
-          <div className="absolute inset-0 bg-[radial-gradient(#242434_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
-
-          {/* Header Bar inside Viewport */}
-          <div className="flex flex-wrap items-center justify-between pb-4 border-b border-[#242434] gap-3 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-mono text-[#64748B] tracking-wider uppercase truncate max-w-[180px] sm:max-w-none">
-                TIMEWITNESS // GEMINI AI 5-SCENE RECONSTRUCTION
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Demo Mode Badge */}
-              {isDemoMode && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-[11px] font-bold text-amber-400">
-                  <Beaker className="w-3 h-3" />
-                  {currentLang === 'EN' ? 'Demo Mode · Sample Story' : 'डेमो मोड'}
-                </span>
-              )}
-              {/* Fallback Badge */}
-              {isFallback && !isDemoMode && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/10 border border-slate-500/40 text-[11px] font-medium text-slate-400">
-                  <Radio className="w-3 h-3 animate-pulse" />
-                  {currentLang === 'EN' ? 'Offline · Fallback Story' : 'ऑफ़लाइन मोड'}
-                </span>
-              )}
-              {scenes.length > 0 && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161622] border border-[#D4AF37]/40 text-[11px] font-medium text-[#FFF3C4] shadow-gold-glow">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span className="hidden sm:inline">5-Scene Historical Journey Active</span>
-                  <span className="sm:hidden">5-Scene Active</span>
-                </span>
-              )}
-            </div>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2 text-xs font-bold text-[#94A3B8] hover:text-[#D4AF37] transition-colors mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('backToExplore')}
+          </button>
+          <h1 className="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F8FAFC] uppercase tracking-tight mb-3">
+            {searchQuery}
+          </h1>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-[#cbd5e1] font-mono">
+            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-[#D4AF37]" /> {metaYear}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#D4AF37]" /> {metaLocation}</span>
+            <span className="flex items-center gap-1.5"><Globe2 className="w-4 h-4 text-[#D4AF37]" /> {metaRegion}</span>
+            <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-sans font-semibold text-xs">
+              <ShieldCheck className="w-4 h-4" /> {t('verifiedRecords')}
+            </span>
           </div>
+        </div>
+      </div>
 
-          {/* MAIN CONTENT CANVAS */}
-          <div className="my-6 relative z-10 flex-1 flex flex-col justify-center">
-
-            {/* STATE 1: IDLE / EMPTY PLACEHOLDER STATE */}
-            {!isLoading && scenes.length === 0 && (
-              <motion.div 
+      <div className="flex flex-col lg:flex-row gap-6">
+        
+        <div className="w-full lg:w-[65%] space-y-6">
+          
+          <div 
+            ref={playerRef}
+            className={`relative w-full rounded-2xl overflow-hidden bg-[#0A0A0E] border border-[#242434] shadow-2xl group transition-all duration-300 ${isFullscreen ? 'h-screen rounded-none border-none' : 'aspect-video'}`}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSceneIdx}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-12 px-4 text-center flex flex-col items-center justify-center max-w-2xl mx-auto"
-              >
-                <div className="relative w-20 h-20 rounded-2xl bg-[#14141C] border border-[#D4AF37]/30 flex items-center justify-center mb-6 shadow-gold-glow">
-                  <Film className="w-10 h-10 text-[#D4AF37] animate-pulse-slow" />
-                  <Sparkles className="w-4 h-4 text-[#FFF3C4] absolute -top-1 -right-1 animate-spin" style={{ animationDuration: '8s' }} />
-                </div>
-
-                <h3 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#F8FAFC] mb-3">
-                  {currentLang === 'EN' ? 'Awaiting Historical Coordinates' : 'ऐतिहासिक निर्देशांक प्रतीक्षारत'}
-                </h3>
-                
-                <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed mb-8">
-                  {currentLang === 'EN' 
-                    ? 'Enter any topic or select a sample pill above to generate a 5-scene AI historical narrative powered by Gemini.'
-                    : 'ऊपर दिए गए टैग पर क्लिक करें या जेमिनी द्वारा 5-दृश्य कथा बनाने के लिए कोई भी विषय खोजें।'}
-                </p>
-
-                {/* Feature Pills */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mb-6">
-                  <div className="glass-panel p-3.5 rounded-xl text-left border border-[#242434]">
-                    <Eye className="w-4 h-4 text-[#D4AF37] mb-1.5" />
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">5 Sequential Scenes</h4>
-                    <p className="text-[11px] text-[#64748B] mt-0.5">Origin to Legacy arc</p>
-                  </div>
-                  <div className="glass-panel p-3.5 rounded-xl text-left border border-[#242434]">
-                    <Volume2 className="w-4 h-4 text-[#D4AF37] mb-1.5" />
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">Ambient Audio Tags</h4>
-                    <p className="text-[11px] text-[#64748B] mt-0.5">Web Audio soundscapes</p>
-                  </div>
-                  <div className="glass-panel p-3.5 rounded-xl text-left border border-[#242434]">
-                    <Wand2 className="w-4 h-4 text-[#D4AF37] mb-1.5" />
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">Detailed Art Prompts</h4>
-                    <p className="text-[11px] text-[#64748B] mt-0.5">Historical visual renders</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* STATE 2: LOADING CINEMATIC GENERATION ANIMATION */}
-            {isLoading && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="py-16 px-4 text-center flex flex-col items-center justify-center max-w-xl mx-auto"
-              >
-                <div className="relative w-16 h-16 mb-6 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-2 border-t-[#D4AF37] border-r-transparent border-b-[#D4AF37]/30 border-l-transparent animate-spin" />
-                  <RefreshCw className="w-6 h-6 text-[#D4AF37] animate-pulse" />
-                </div>
-
-                <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-[#FFF3C4] mb-2">
-                  {currentLang === 'EN' ? 'Gemini AI Generating 5-Scene Journey...' : 'जेमिनी AI 5-दृश्य यात्रा तैयार कर रहा है...'}
-                </h3>
-                
-                <p className="text-xs sm:text-sm text-[#D4AF37] font-mono mb-6 animate-pulse">
-                  Synthesizing Origin, Rise, Climax, Victory &amp; Legacy...
-                </p>
-
-                <div className="w-full h-2 rounded-full bg-[#1B1B26] border border-[#242434] overflow-hidden mb-3">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-[#B89220] via-[#D4AF37] to-[#FFF3C4] animate-shimmer"
-                    style={{ width: '85%' }}
-                  />
-                </div>
-                <span className="text-xs text-[#64748B] font-mono">Gemini 2.5 Flash Engine Active</span>
-              </motion.div>
-            )}
-
-            {/* STATE 3: 5-SCENE INTERACTIVE JOURNEY VIEW */}
-            {!isLoading && scenes.length > 0 && currentScene && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
-                className="space-y-6"
+                className="absolute inset-0"
               >
-                
-                {/* 5-Scene Navigation Stepper Tabs — horizontal scroll on mobile */}
-                <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-2 border-b border-[#242434] scrollbar-none snap-x snap-mandatory">
-                  {scenes.map((sc, idx) => {
-                    const isActive = idx === activeSceneIdx;
-                    return (
-                      <button
-                        key={sc.sceneNumber || idx}
-                        onClick={() => {
-                          setActiveSceneIdx(idx);
-                          setIsPlayingAudio(false);
-                        }}
-                        className={`flex-none sm:flex-1 min-w-[100px] sm:min-w-[110px] snap-start p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#14141C] border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
-                            : 'bg-[#14141C]/60 border-[#242434] text-[#94A3B8] hover:bg-[#1B1B26] hover:text-[#F8FAFC]'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[10px] font-mono uppercase text-[#D4AF37] mb-0.5">
-                          <span>Scene {sc.sceneNumber}</span>
-                          {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-ping" />}
-                        </div>
-                        <h5 className="text-xs font-bold truncate text-[#F8FAFC]">{sc.title}</h5>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Scene Content Grid */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeSceneIdx}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25 }}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
-                  >
-                    {/* Left Column: Visual Artwork Frame */}
-                    <div className="lg:col-span-6 relative group rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl aspect-video bg-[#14141C]">
-                      <Image
-                        src={getSceneImage(searchQuery, activeSceneIdx)}
-                        alt={currentScene.title}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        priority={activeSceneIdx === 0}
-                        className="object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D11] via-transparent to-black/30" />
-
-                      {/* Overlaid Era Badge */}
-                      <div className="absolute top-3 left-3 flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-md bg-[#0D0D11]/85 backdrop-blur-md border border-[#D4AF37]/40 text-[11px] font-semibold text-[#FFF3C4] flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
-                          <span className="truncate max-w-[160px]">{currentScene.era}</span>
-                        </span>
-                      </div>
-
-                      {/* Audio Ambient Tag Bar */}
-                      <div className="absolute bottom-3 left-3 right-3 p-2.5 rounded-xl bg-[#0D0D11]/90 backdrop-blur-xl border border-[#D4AF37]/30 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          {/* Play / Pause ambient audio */}
-                          <button
-                            onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-                            className="w-8 h-8 rounded-full bg-[#D4AF37] text-[#0D0D11] flex items-center justify-center hover:scale-105 transition-transform shadow-gold-glow shrink-0"
-                            aria-label={isPlayingAudio ? 'Pause ambient audio' : 'Play ambient audio'}
-                          >
-                            {isPlayingAudio ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
-                          </button>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-[#F8FAFC] truncate">Ambient: #{currentScene.ambientTag}</span>
-                            <span className="text-[10px] text-[#D4AF37] flex items-center gap-1">
-                              <Radio className="w-3 h-3 animate-pulse" />
-                              <span>Spatial Soundscape</span>
-                            </span>
-                          </div>
-                        </div>
-                        {/* Mute toggle inside player */}
-                        <button
-                          onClick={onToggleMute}
-                          aria-label={isMuted ? 'Unmute' : 'Mute'}
-                          className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-                            isMuted
-                              ? 'border-[#242434] text-[#4A5568] hover:text-[#94A3B8]'
-                              : 'border-[#D4AF37]/40 text-[#D4AF37] hover:border-[#D4AF37]'
-                          }`}
-                        >
-                          {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Right Column: Narration & Scene Details */}
-                    <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-4">
-                      
-                      <div>
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-extrabold text-[#D4AF37]">
-                            SCENE {currentScene.sceneNumber} OF 5
-                          </span>
-                          <span className="text-xs text-[#94A3B8] font-mono">{currentScene.era}</span>
-                        </div>
-                        <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-[#F8FAFC] leading-snug">
-                          {currentScene.title}
-                        </h3>
-                      </div>
-
-                      {/* Dramatic Narration Text */}
-                      <div className="glass-panel p-4 rounded-xl border border-[#D4AF37]/20 relative">
-                        <p className="text-xs sm:text-sm text-[#E2E8F0] leading-relaxed font-sans">
-                          &ldquo;{currentScene.narration}&rdquo;
-                        </p>
-                      </div>
-
-                      {/* Image Art Prompt Box */}
-                      <div className="bg-[#14141C] p-3 rounded-xl border border-[#242434]">
-                        <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider block mb-1">
-                          Visual Concept Art Prompt:
-                        </span>
-                        <p className="text-[11px] text-[#94A3B8] italic line-clamp-2">
-                          {currentScene.imagePrompt}
-                        </p>
-                      </div>
-
-                      {/* Evidence Classification Badges */}
-                      {(currentScene.historicalFact || currentScene.reconstructionNote || currentScene.simulationNote) && (
-                        <div className="flex flex-col gap-2 pt-1">
-                          {currentScene.historicalFact && (
-                            <EvidenceTag type="fact" text={currentScene.historicalFact} />
-                          )}
-                          {currentScene.reconstructionNote && (
-                            <EvidenceTag type="reconstruction" text={currentScene.reconstructionNote} />
-                          )}
-                          {currentScene.simulationNote && (
-                            <EvidenceTag type="simulation" text={currentScene.simulationNote} />
-                          )}
-                        </div>
-                      )}
-
-                      {/* Navigation Controls */}
-                      <div className="flex items-center justify-between pt-2 gap-2">
-                        <button
-                          onClick={() => {
-                            setActiveSceneIdx(prev => Math.max(0, prev - 1));
-                            setIsPlayingAudio(false);
-                          }}
-                          disabled={activeSceneIdx === 0}
-                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                            activeSceneIdx === 0
-                              ? 'opacity-40 border-[#242434] text-[#64748B] cursor-not-allowed'
-                              : 'border-[#242434] hover:border-[#D4AF37] text-[#94A3B8] hover:text-[#F8FAFC] bg-[#14141C]'
-                          }`}
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span className="hidden sm:inline">Previous Scene</span>
-                          <span className="sm:hidden">Prev</span>
-                        </button>
-
-                        <button
-                          onClick={() => onOpenTalkToHistory(searchQuery)}
-                          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[#D4AF37] text-[#0D0D11] font-bold text-xs hover:bg-[#FFF3C4] transition-all shadow-gold-glow"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                          <span className="hidden sm:inline">Talk to Witness</span>
-                          <span className="sm:hidden">Talk</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setActiveSceneIdx(prev => Math.min(scenes.length - 1, prev + 1));
-                            setIsPlayingAudio(false);
-                          }}
-                          disabled={activeSceneIdx === scenes.length - 1}
-                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                            activeSceneIdx === scenes.length - 1
-                              ? 'opacity-40 border-[#242434] text-[#64748B] cursor-not-allowed'
-                              : 'border-[#242434] hover:border-[#D4AF37] text-[#94A3B8] hover:text-[#F8FAFC] bg-[#14141C]'
-                          }`}
-                        >
-                          <span className="hidden sm:inline">Next Scene</span>
-                          <span className="sm:hidden">Next</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                    </div>
-
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Primary & Academic Sources Panel */}
-                <div className="pt-2">
-                  <SourcesPanel topic={searchQuery} />
-                </div>
-
-                {/* Share & Export Panel — visible on last scene */}
-                {isOnLastScene && (
-                  <ShareExportPanel
-                    scenes={scenes}
-                    searchQuery={searchQuery}
-                    currentLang={currentLang}
-                    onToastSuccess={onToastSuccess}
-                    onToastError={onToastError}
+                {mediaType === 'fallback' ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#14141C] text-[#64748B]">
+                    <ImageIcon className="w-16 h-16 mb-4 opacity-20" />
+                    <span className="font-cinzel text-lg opacity-60">{t('visualArchiveUnavailable')}</span>
+                  </div>
+                ) : (
+                  <Image
+                    src={getSceneImage(searchQuery, activeSceneIdx)}
+                    alt={currentScene?.title || 'Historical Scene'}
+                    fill
+                    priority
+                    className="object-cover group-hover:scale-105 transition-transform duration-[10000ms] ease-out"
+                    onError={handleImageError}
                   />
                 )}
-
               </motion.div>
-            )}
+            </AnimatePresence>
 
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4 sm:p-6 pointer-events-none">
+              
+              <div className="flex justify-between items-start pointer-events-auto">
+                <span className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-xs font-bold text-white shadow-lg">
+                  {t('scene')} {currentScene?.sceneNumber} {'//'} {TIMELINE_LABELS[activeSceneIdx] || t('scene')}
+                </span>
+                
+                <div className="flex gap-2">
+                  <button onClick={handleFavorite} className="p-2 rounded-lg bg-black/60 backdrop-blur-md hover:bg-black/80 text-white transition-all border border-white/10">
+                    <Heart className={`w-4 h-4 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 pointer-events-auto">
+                <h3 className="font-cinzel text-2xl font-bold text-white drop-shadow-md">{currentScene?.title}</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                      className="w-10 h-10 rounded-full bg-[#D4AF37] text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                    >
+                      {isPlayingAudio ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-1" />}
+                    </button>
+                    <button onClick={onToggleMute} className="text-white hover:text-[#D4AF37] transition-colors p-2">
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <button onClick={toggleFullscreen} className="text-white hover:text-[#D4AF37] transition-colors p-2">
+                      <Maximize className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Footer Bar inside Viewport */}
-          <div className="pt-4 border-t border-[#242434] flex flex-wrap items-center justify-between gap-3 text-xs text-[#64748B] relative z-10">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <span className={`w-2 h-2 rounded-full animate-pulse ${isDemoMode ? 'bg-amber-400' : isFallback ? 'bg-slate-400' : 'bg-emerald-500'}`} />
-                <span>
-                  {isDemoMode
-                    ? 'Demo Mode · Curated Sample Story'
-                    : isFallback
-                    ? 'Fallback Mode · Offline Story'
-                    : 'Gemini API Strict JSON Pipeline Active'}
-                </span>
-              </span>
+          <div className="bg-[#14141C] p-1.5 rounded-2xl border border-[#242434] overflow-x-auto scrollbar-none">
+            <div className="flex items-stretch gap-1 min-w-max">
+              {scenes.map((sc, idx) => {
+                const isActive = idx === activeSceneIdx;
+                const isPast = idx < activeSceneIdx;
+                const label = TIMELINE_LABELS[idx] || `${t('scene')} ${idx + 1}`;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => { setActiveSceneIdx(idx); setIsPlayingAudio(false); }}
+                    className={`relative flex-1 min-w-[120px] sm:min-w-[140px] px-3 py-3 rounded-xl transition-all group overflow-hidden ${
+                      isActive ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/50' : 'hover:bg-[#1B1B26] border border-transparent'
+                    }`}
+                  >
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/5 to-[#D4AF37]/0 animate-shimmer" />}
+                    <div className="flex flex-col relative z-10 text-left">
+                      <span className={`text-[10px] font-mono tracking-wider font-bold mb-1 ${isActive ? 'text-[#D4AF37]' : isPast ? 'text-[#94A3B8]' : 'text-[#475569]'}`}>
+                        0{idx + 1} {label}
+                      </span>
+                      <span className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-[#94A3B8]'}`}>
+                        {sc.title}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-3">
-              <span>TimeWitness Engine v2.0</span>
+          </div>
+
+        </div>
+
+        <div className="w-full lg:w-[35%] flex flex-col gap-4">
+          
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              onClick={() => onOpenTalkToHistory(searchQuery)}
+              className="col-span-2 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#FFF3C4] text-black font-bold text-sm transition-colors shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+            >
+              <MessageCircle className="w-4 h-4" /> {t('talkToWitness')}
+            </button>
+            
+            <button onClick={scrollToContext} className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-[#14141C] border border-[#242434] hover:border-[#D4AF37]/50 hover:bg-[#1B1B26] text-[#94A3B8] hover:text-[#D4AF37] transition-all text-xs font-bold">
+              <BookOpen className="w-4 h-4" /> {t('explore')}
+            </button>
+            <button onClick={scrollToEvidence} className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-[#14141C] border border-[#242434] hover:border-[#D4AF37]/50 hover:bg-[#1B1B26] text-[#94A3B8] hover:text-[#D4AF37] transition-all text-xs font-bold">
+              <ShieldCheck className="w-4 h-4" /> {t('verifyFacts')}
+            </button>
+            <button onClick={() => setIsWhatIfOpen(true)} className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-[#14141C] border border-[#242434] hover:border-purple-500/50 hover:bg-[#1B1B26] text-[#94A3B8] hover:text-purple-400 transition-all text-xs font-bold">
+              <AlertTriangle className="w-4 h-4" /> {t('whatIf')}
+            </button>
+            
+            <div className="flex gap-2">
+              <button onClick={handleSave} className={`flex-1 flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all text-xs font-bold ${isSaved ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-[#14141C] border-[#242434] hover:border-[#D4AF37]/50 hover:bg-[#1B1B26] text-[#94A3B8] hover:text-white'}`}>
+                <Save className="w-4 h-4" /> {isSaved ? t('saved') : t('save')}
+              </button>
+              <button onClick={handleShare} className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-[#14141C] border border-[#242434] hover:border-[#D4AF37]/50 hover:bg-[#1B1B26] text-[#94A3B8] hover:text-white transition-all text-xs font-bold">
+                <Share2 className="w-4 h-4" /> {t('share')}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 bg-[#14141C] border border-[#242434] rounded-2xl p-5 sm:p-6 flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <BookOpen className="w-24 h-24" />
+            </div>
+            <h4 className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+              {t('historiansNarration')}
+            </h4>
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-[#E2E8F0] leading-relaxed font-serif text-base sm:text-lg italic relative z-10">
+              &quot;{currentScene?.narration}&quot;
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#242434] flex items-center justify-between text-xs font-mono text-[#64748B]">
+              <span>Audio: {isPlayingAudio ? t('audioPlaying') : t('audioPaused')}</span>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => { setActiveSceneIdx(Math.max(0, activeSceneIdx - 1)); setIsPlayingAudio(false); }}
+                  disabled={activeSceneIdx === 0}
+                  className="p-1 hover:text-white disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span>{t('scene')} {activeSceneIdx + 1}/5</span>
+                <button 
+                  onClick={() => { setActiveSceneIdx(Math.min(scenes.length - 1, activeSceneIdx + 1)); setIsPlayingAudio(false); }}
+                  disabled={activeSceneIdx === scenes.length - 1}
+                  className="p-1 hover:text-white disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div id="context-section" className="bg-[#0A0A0E] border border-[#242434] rounded-2xl p-6 sm:p-8">
+          <h3 className="font-cinzel text-2xl font-bold text-[#F8FAFC] mb-6 flex items-center gap-3">
+            <BookOpen className="w-6 h-6 text-[#D4AF37]" /> {t('historicalContext')}
+          </h3>
+          
+          <div className="space-y-6 text-sm text-[#cbd5e1] leading-relaxed">
+            <div>
+              <h4 className="text-[#D4AF37] font-bold uppercase text-xs tracking-wider mb-2">{t('whatHappened')}</h4>
+              <p>The events depicted in this sequence form a crucial arc in the timeline of {searchQuery}. This meticulously reconstructed narrative highlights the key turning points that defined the era.</p>
+            </div>
+            <div>
+              <h4 className="text-[#D4AF37] font-bold uppercase text-xs tracking-wider mb-2">{t('whyItMattered')}</h4>
+              <p>These actions reverberated through history, shaping political, social, and cultural boundaries. The legacy of this moment continues to influence modern historical interpretations.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="evidence-section" className="bg-[#0A0A0E] border border-[#242434] rounded-2xl p-6 sm:p-8">
+          <h3 className="font-cinzel text-2xl font-bold text-[#F8FAFC] mb-6 flex items-center gap-3">
+            <ShieldCheck className="w-6 h-6 text-emerald-500" /> {t('evidenceRecords')}
+          </h3>
+          
+          <div className="space-y-4">
+            {currentScene?.historicalFact && (
+              <EvidenceTag type="fact" text={currentScene.historicalFact} />
+            )}
+            {currentScene?.reconstructionNote && (
+              <EvidenceTag type="reconstruction" text={currentScene.reconstructionNote} />
+            )}
+            {currentScene?.simulationNote && (
+              <EvidenceTag type="simulation" text={currentScene.simulationNote} />
+            )}
+            
+            {!currentScene?.historicalFact && !currentScene?.reconstructionNote && !currentScene?.simulationNote && (
+              <EvidenceTag type="fact" text="This scene is based on established historical records and primary sources from the era." />
+            )}
+            
+            <div className="pt-4 mt-4 border-t border-[#242434]">
+              <SourcesPanel topic={searchQuery} />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="mt-10">
+        <ShareExportPanel searchQuery={searchQuery} scenesLength={scenes.length} />
+      </div>
+
+      <WhatIfModal
+        isOpen={isWhatIfOpen}
+        onClose={() => setIsWhatIfOpen(false)}
+        searchQuery={searchQuery}
+        sceneTitle={currentScene?.title}
+        era={currentScene?.era}
+      />
+
+      <AuthPrompt 
+        isOpen={authPromptOpen} 
+        onClose={() => setAuthPromptOpen(false)} 
+        title="Sign In Required"
+        message="Please sign in to save or favorite experiences."
+      />
     </section>
   );
 }

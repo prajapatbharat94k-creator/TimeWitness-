@@ -2,28 +2,48 @@
  * Client-side localStorage helpers for TimeWitness.
  * All functions are safe to call during SSR (typeof window guard).
  * Never throws — every function has a try/catch.
+ * Serves as persistent offline storage and cache for Supabase.
  */
 
-export interface LocalExperience {
-  id: string; // topic-language slug
-  topic: string;
-  language: string;
-  savedAt: string;
-  scenes: unknown[];
+export interface ExperienceCardData {
+  id: string;
+  title: string;
+  subject: string;
+  year?: string;
+  location?: string;
+  cover_image?: string;
+  slug: string;
+  progress?: number;
+  added_at?: string;
+  last_viewed_at?: string;
 }
 
-export interface RecentlyViewedEntry {
+export interface ActivityEntry {
   id: string;
-  topic: string;
+  type: 'witnessed' | 'saved' | 'favorited';
+  title: string;
+  subject: string;
+  timestamp: string;
+}
+
+export interface DbProfile {
+  id: string;
+  name: string | null;
+  avatar_url: string | null;
   language: string;
-  viewedAt: string;
+  voice_enabled: boolean;
+  autoplay: boolean;
+  theme: string;
 }
 
 // ─── Storage Keys ────────────────────────────────────────────────────────────
 const KEYS = {
   FAVORITES: 'tw_favorites',
-  RECENTLY_VIEWED: 'tw_recently_viewed',
-  SAVED_EXPERIENCES: 'tw_saved_experiences',
+  SAVED: 'tw_saved_experiences',
+  HISTORY: 'tw_user_history',
+  ACTIVITIES: 'tw_activities',
+  AUTH_USER: 'tw_auth_user',
+  PROFILE_PREFIX: 'tw_profile_',
 } as const;
 
 // ─── Safe localStorage access ─────────────────────────────────────────────────
@@ -45,6 +65,15 @@ function setItem(key: string, value: string): void {
   }
 }
 
+function removeItem(key: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Silent
+  }
+}
+
 function parseJSON<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;
   try {
@@ -54,91 +83,155 @@ function parseJSON<T>(raw: string | null, fallback: T): T {
   }
 }
 
-// ─── Favorites ────────────────────────────────────────────────────────────────
-export function getFavorites(): string[] {
-  return parseJSON<string[]>(getItem(KEYS.FAVORITES), []);
+function getKey(base: string, userId?: string | null): string {
+  return userId ? `${base}_${userId}` : base;
 }
 
-export function isFavorited(id: string): boolean {
-  return getFavorites().includes(id);
+// ─── Auth User Storage ────────────────────────────────────────────────────────
+export function getLocalAuthUser(): any | null {
+  return parseJSON(getItem(KEYS.AUTH_USER), null);
 }
 
-export function addFavorite(id: string): void {
-  const favs = getFavorites();
-  if (!favs.includes(id)) {
-    setItem(KEYS.FAVORITES, JSON.stringify([...favs, id]));
-  }
+export function setLocalAuthUser(user: any): void {
+  setItem(KEYS.AUTH_USER, JSON.stringify(user));
 }
 
-export function removeFavorite(id: string): void {
-  const favs = getFavorites().filter((f) => f !== id);
-  setItem(KEYS.FAVORITES, JSON.stringify(favs));
+export function clearLocalAuthUser(): void {
+  removeItem(KEYS.AUTH_USER);
 }
 
-export function toggleFavorite(id: string): boolean {
-  if (isFavorited(id)) {
-    removeFavorite(id);
-    return false;
-  } else {
-    addFavorite(id);
-    return true;
-  }
-}
-
-// ─── Recently Viewed ─────────────────────────────────────────────────────────
-const MAX_RECENT = 10;
-
-export function getRecentlyViewed(): RecentlyViewedEntry[] {
-  return parseJSON<RecentlyViewedEntry[]>(getItem(KEYS.RECENTLY_VIEWED), []);
-}
-
-export function addRecentlyViewed(topic: string, language: string): void {
-  const id = buildId(topic, language);
-  const existing = getRecentlyViewed().filter((e) => e.id !== id);
-  const entry: RecentlyViewedEntry = {
-    id,
-    topic,
-    language,
-    viewedAt: new Date().toISOString(),
+// ─── Profile Storage ──────────────────────────────────────────────────────────
+export function getLocalProfile(userId: string, defaultName?: string, defaultEmail?: string): DbProfile {
+  const stored = parseJSON<Partial<DbProfile> | null>(getItem(`${KEYS.PROFILE_PREFIX}${userId}`), null);
+  return {
+    id: userId,
+    name: stored?.name || defaultName || (defaultEmail ? defaultEmail.split('@')[0] : 'Historian'),
+    avatar_url: stored?.avatar_url || null,
+    language: stored?.language || 'English',
+    voice_enabled: stored?.voice_enabled ?? true,
+    autoplay: stored?.autoplay ?? false,
+    theme: stored?.theme || 'dark',
   };
-  const updated = [entry, ...existing].slice(0, MAX_RECENT);
-  setItem(KEYS.RECENTLY_VIEWED, JSON.stringify(updated));
+}
+
+export function updateLocalProfile(userId: string, updates: Partial<DbProfile>): DbProfile {
+  const current = getLocalProfile(userId);
+  const updated: DbProfile = { ...current, ...updates };
+  setItem(`${KEYS.PROFILE_PREFIX}${userId}`, JSON.stringify(updated));
+  return updated;
+}
+
+// ─── Favorites ────────────────────────────────────────────────────────────────
+export function getUserFavorites(userId?: string | null): ExperienceCardData[] {
+  return parseJSON<ExperienceCardData[]>(getItem(getKey(KEYS.FAVORITES, userId)), []);
+}
+
+export function isUserFavorited(id: string, userId?: string | null): boolean {
+  const favs = getUserFavorites(userId);
+  return favs.some((f) => f.id === id || f.slug === id || f.subject.toLowerCase() === id.toLowerCase());
+}
+
+export function setUserFavorite(card: ExperienceCardData, isFav: boolean, userId?: string | null): void {
+  const current = getUserFavorites(userId);
+  const key = getKey(KEYS.FAVORITES, userId);
+
+  if (isFav) {
+    const exists = current.some((f) => f.id === card.id || f.subject === card.subject);
+    if (!exists) {
+      const item: ExperienceCardData = {
+        ...card,
+        added_at: new Date().toISOString(),
+      };
+      setItem(key, JSON.stringify([item, ...current]));
+      recordActivity('favorited', card.title, card.subject, userId);
+    }
+  } else {
+    const updated = current.filter((f) => f.id !== card.id && f.subject !== card.subject);
+    setItem(key, JSON.stringify(updated));
+  }
 }
 
 // ─── Saved Experiences ────────────────────────────────────────────────────────
-export function getSavedExperiences(): LocalExperience[] {
-  return parseJSON<LocalExperience[]>(getItem(KEYS.SAVED_EXPERIENCES), []);
+export function getUserSaved(userId?: string | null): ExperienceCardData[] {
+  return parseJSON<ExperienceCardData[]>(getItem(getKey(KEYS.SAVED, userId)), []);
 }
 
-export function saveExperienceLocally(
-  topic: string,
-  language: string,
-  scenes: unknown[]
-): void {
-  const id = buildId(topic, language);
-  const existing = getSavedExperiences().filter((e) => e.id !== id);
-  const entry: LocalExperience = {
-    id,
-    topic,
-    language,
-    savedAt: new Date().toISOString(),
-    scenes,
+export function isUserSaved(id: string, userId?: string | null): boolean {
+  const saved = getUserSaved(userId);
+  return saved.some((s) => s.id === id || s.slug === id || s.subject.toLowerCase() === id.toLowerCase());
+}
+
+export function setUserSaved(card: ExperienceCardData, isSaved: boolean, userId?: string | null): void {
+  const current = getUserSaved(userId);
+  const key = getKey(KEYS.SAVED, userId);
+
+  if (isSaved) {
+    const exists = current.some((s) => s.id === card.id || s.subject === card.subject);
+    if (!exists) {
+      const item: ExperienceCardData = {
+        ...card,
+        added_at: new Date().toISOString(),
+      };
+      setItem(key, JSON.stringify([item, ...current]));
+      recordActivity('saved', card.title, card.subject, userId);
+    }
+  } else {
+    const updated = current.filter((s) => s.id !== card.id && s.subject !== card.subject);
+    setItem(key, JSON.stringify(updated));
+  }
+}
+
+// ─── User History ─────────────────────────────────────────────────────────────
+const MAX_HISTORY = 30;
+
+export function getUserHistory(userId?: string | null): ExperienceCardData[] {
+  return parseJSON<ExperienceCardData[]>(getItem(getKey(KEYS.HISTORY, userId)), []);
+}
+
+export function addUserHistory(card: ExperienceCardData, userId?: string | null): void {
+  const current = getUserHistory(userId);
+  const key = getKey(KEYS.HISTORY, userId);
+
+  const existing = current.filter((h) => h.id !== card.id && h.subject.toLowerCase() !== card.subject.toLowerCase());
+  const entry: ExperienceCardData = {
+    ...card,
+    last_viewed_at: new Date().toISOString(),
   };
-  setItem(KEYS.SAVED_EXPERIENCES, JSON.stringify([entry, ...existing].slice(0, 20)));
+
+  const updated = [entry, ...existing].slice(0, MAX_HISTORY);
+  setItem(key, JSON.stringify(updated));
+  recordActivity('witnessed', card.title, card.subject, userId);
 }
 
-export function isExperienceSaved(topic: string, language: string): boolean {
-  const id = buildId(topic, language);
-  return getSavedExperiences().some((e) => e.id === id);
+// ─── Activity Log ─────────────────────────────────────────────────────────────
+const MAX_ACTIVITIES = 20;
+
+export function getUserActivities(userId?: string | null): ActivityEntry[] {
+  return parseJSON<ActivityEntry[]>(getItem(getKey(KEYS.ACTIVITIES, userId)), []);
 }
 
-export function removeSavedExperience(topic: string, language: string): void {
-  const id = buildId(topic, language);
-  const updated = getSavedExperiences().filter((e) => e.id !== id);
-  setItem(KEYS.SAVED_EXPERIENCES, JSON.stringify(updated));
+export function recordActivity(
+  type: 'witnessed' | 'saved' | 'favorited',
+  title: string,
+  subject: string,
+  userId?: string | null
+): void {
+  const current = getUserActivities(userId);
+  const key = getKey(KEYS.ACTIVITIES, userId);
+
+  const entry: ActivityEntry = {
+    id: `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    type,
+    title,
+    subject,
+    timestamp: new Date().toISOString(),
+  };
+
+  const updated = [entry, ...current].slice(0, MAX_ACTIVITIES);
+  setItem(key, JSON.stringify(updated));
 }
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
-export function buildId(topic: string, language: string): string {
-  return `${topic.toLowerCase().replace(/\s+/g, '-').substring(0, 80)}-${language}`;
+export function buildId(topic: string, language: string = 'en'): string {
+  return `${topic.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').substring(0, 80)}-${language.toLowerCase()}`;
 }

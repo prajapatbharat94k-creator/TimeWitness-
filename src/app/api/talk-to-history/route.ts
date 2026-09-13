@@ -84,17 +84,47 @@ export async function POST(req: Request) {
 
     const cleanMessage = sanitizeInput(message);
 
-    // Validate language
-    const lang = language === 'HI' ? 'HI' : 'EN';
+    // Resolve language (EN, HI, MR, TE, GU, TA, BN)
+    const SUPPORTED_LANGS: Record<string, { code: string; name: string; nativeName: string }> = {
+      EN: { code: 'EN', name: 'English', nativeName: 'English' },
+      HI: { code: 'HI', name: 'Hindi', nativeName: 'हिन्दी' },
+      MR: { code: 'MR', name: 'Marathi', nativeName: 'मराठी' },
+      TE: { code: 'TE', name: 'Telugu', nativeName: 'తెలుగు' },
+      GU: { code: 'GU', name: 'Gujarati', nativeName: 'ગુજરાતી' },
+      TA: { code: 'TA', name: 'Tamil', nativeName: 'தமிழ்' },
+      BN: { code: 'BN', name: 'Bengali', nativeName: 'বাংলা' },
+    };
+
+    let resolvedLang = SUPPORTED_LANGS.EN;
+    if (typeof language === 'string') {
+      const upper = language.trim().toUpperCase();
+      if (SUPPORTED_LANGS[upper]) {
+        resolvedLang = SUPPORTED_LANGS[upper];
+      } else {
+        const lower = language.trim().toLowerCase();
+        for (const item of Object.values(SUPPORTED_LANGS)) {
+          if (item.name.toLowerCase() === lower || item.nativeName.toLowerCase() === lower) {
+            resolvedLang = item;
+            break;
+          }
+        }
+      }
+    }
+
+    const FALLBACK_REPLIES: Record<string, string> = {
+      EN: "My voice is not available at this moment, traveler. Please return again shortly.",
+      HI: "मैं क्षमा चाहता हूँ, इस समय मेरी वाणी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
+      MR: "माफ करा, या क्षणी माझा आवाज उपलब्ध नाही. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.",
+      GU: "હું ક્ષમા ચાહું છું, આ સમયે મારો અવાજ ઉપલબ્ધ નથી. કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો.",
+      TE: "క్షమించండి, ఈ సమయంలో నా స్వరం అందుబాటులో లేదు. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి.",
+      TA: "மன்னிக்கவும், இந்த நேரத்தில் என் குரல் கிடைக்கவில்லை. சிறிது நேரம் கழித்து மீண்டும் முயற்சிக்கவும்.",
+      BN: "আমি দুঃখিত, এই মুহূর্তে আমার কন্ঠস্বর উপলব্ধ নেই। অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন।",
+    };
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      // Fallback reply when no API key
       return NextResponse.json({
-        reply:
-          lang === 'HI'
-            ? 'मैं क्षमा चाहता हूँ, इस समय मेरी वाणी उपलब्ध नहीं है। कृपया बाद में प्रयास करें।'
-            : "My voice is not available at this time, traveler. Please return again shortly.",
+        reply: FALLBACK_REPLIES[resolvedLang.code] || FALLBACK_REPLIES.EN,
         figureId,
         source: 'fallback',
       });
@@ -109,17 +139,15 @@ export async function POST(req: Request) {
       persona: 'Historical leader speaking from memoirs and records.',
     };
 
-    const isHindi = lang === 'HI';
-
     const systemInstruction = `You are roleplaying as ${figure.name} (${figure.role}, ${figure.era}).
 Persona traits: ${figure.persona}
 
 CRITICAL RULES:
-1. Speak strictly in the first person ("I", "my realm", "my soldiers", or in Hindi "मैं", "मेरा", "हम"). Never break character or refer to yourself as an AI.
-2. Reply in ${isHindi ? 'Hindi (हिन्दी) in Devanagari script' : 'English'}.
+1. Speak strictly in the first person ("I", "my realm", "my soldiers", or native equivalents). Never break character or refer to yourself as an AI.
+2. Reply in natural ${resolvedLang.name} (${resolvedLang.nativeName}) script.
 3. Keep the answer vivid, authentic, dramatic, and concise (2 to 4 sentences max) so it sounds great when read out loud by text-to-speech.
 4. Address the user respectfully as a traveler, citizen, or interlocutor from the future or from your court.
-5. Never fabricate specific dates, names, or facts not historically associated with your persona. If unsure, speak in historical generalities.`;
+5. Ground your answers in real historical perspectives associated with your persona. Never fabricate modern knowledge.`;
 
     const prompt = `Interlocutor says: "${cleanMessage}"\n\nRespond in character as ${figure.name}:`;
 

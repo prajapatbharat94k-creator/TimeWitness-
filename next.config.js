@@ -5,15 +5,18 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-        pathname: '/**',
+        hostname: '**',
       },
     ],
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+      config.infrastructureLogging = {
+        level: 'error',
+      };
+    }
+    return config;
   },
 };
 

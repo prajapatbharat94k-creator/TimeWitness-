@@ -139,3 +139,47 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER set_updated_at
   BEFORE UPDATE ON public.historical_experiences
   FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
+
+-- ============================================================
+-- TABLE: saved_experiences
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.saved_experiences (
+  id            UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id       UUID        NOT NULL,
+  experience_id UUID        NOT NULL REFERENCES public.historical_experiences(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, experience_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_user ON public.saved_experiences(user_id);
+
+ALTER TABLE public.saved_experiences ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own saved experiences" ON public.saved_experiences
+  FOR ALL USING (auth.uid() = user_id);
+
+-- ============================================================
+-- TABLE: profiles
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id            UUID        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  name          TEXT,
+  avatar_url    TEXT,
+  language      TEXT        DEFAULT 'English',
+  voice_enabled BOOLEAN     DEFAULT true,
+  autoplay      BOOLEAN     DEFAULT false,
+  theme         TEXT        DEFAULT 'system',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read profiles" ON public.profiles
+  FOR SELECT USING (true);
+CREATE POLICY "Users can update own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE TRIGGER set_profile_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();

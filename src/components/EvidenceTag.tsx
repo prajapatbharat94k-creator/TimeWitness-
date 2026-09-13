@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export type EvidenceType = 'fact' | 'reconstruction' | 'simulation';
 
@@ -12,11 +13,11 @@ interface EvidenceTagProps {
 
 const EVIDENCE_CONFIG: Record<
   EvidenceType,
-  { icon: string; label: string; color: string; bg: string; border: string; glow: string }
+  { icon: string; labelKey: string; color: string; bg: string; border: string; glow: string }
 > = {
   fact: {
     icon: '📜',
-    label: 'HISTORICAL FACT',
+    labelKey: 'historicalFact',
     color: 'text-amber-300',
     bg: 'bg-amber-900/20',
     border: 'border-amber-500/40',
@@ -24,7 +25,7 @@ const EVIDENCE_CONFIG: Record<
   },
   reconstruction: {
     icon: '🎭',
-    label: 'AI RECONSTRUCTION',
+    labelKey: 'aiReconstruction',
     color: 'text-purple-300',
     bg: 'bg-purple-900/20',
     border: 'border-purple-500/40',
@@ -32,7 +33,7 @@ const EVIDENCE_CONFIG: Record<
   },
   simulation: {
     icon: '🔮',
-    label: 'SIMULATION',
+    labelKey: 'simulation',
     color: 'text-cyan-300',
     bg: 'bg-cyan-900/20',
     border: 'border-cyan-500/40',
@@ -40,8 +41,22 @@ const EVIDENCE_CONFIG: Record<
   },
 };
 
-export default function EvidenceTag({ type, text, className = '' }: EvidenceTagProps) {
-  const config = EVIDENCE_CONFIG[type];
+export default function EvidenceTag({ type = 'fact', text, className = '' }: EvidenceTagProps) {
+  const { currentLang } = useLanguage();
+  const config = EVIDENCE_CONFIG[type] || EVIDENCE_CONFIG.fact;
+
+  const getLabel = () => {
+    const labels: Record<string, Record<EvidenceType, string>> = {
+      EN: { fact: 'HISTORICAL FACT', reconstruction: 'AI RECONSTRUCTION', simulation: 'SIMULATION' },
+      HI: { fact: 'ऐतिहासिक तथ्य', reconstruction: 'एआई पुनर्निर्माण', simulation: 'सिमुलेशन' },
+      MR: { fact: 'ऐतिहासिक तथ्य', reconstruction: 'एआय पुनर्निर्माण', simulation: 'सिम्युलेशन' },
+      TE: { fact: 'చారిత్రక వాస్తవం', reconstruction: 'AI పునర్నిర్మాణం', simulation: 'సిమ్యులేషన్' },
+      GU: { fact: 'ઐતિહાસિક હકીકત', reconstruction: 'AI પુનર્નિર્માણ', simulation: 'સિમ્યુલેશન' },
+      TA: { fact: 'வரலாற்று உண்மை', reconstruction: 'AI மறுசீரமைப்பு', simulation: 'உருவகப்படுத்துதல்' },
+      BN: { fact: 'ঐতিহাসিক তথ্য', reconstruction: 'AI পুনর্নির্মাণ', simulation: 'সিমুলেশন' },
+    };
+    return labels[currentLang]?.[type] || labels.EN[type] || config.labelKey;
+  };
 
   return (
     <div
@@ -54,7 +69,7 @@ export default function EvidenceTag({ type, text, className = '' }: EvidenceTagP
       <span className="text-base leading-none mt-0.5 flex-shrink-0">{config.icon}</span>
       <div className="flex flex-col gap-0.5 min-w-0">
         <span className={`text-[10px] font-extrabold tracking-widest uppercase ${config.color}`}>
-          {config.label}
+          {getLabel()}
         </span>
         {text && (
           <p className="text-[11px] text-slate-300 leading-relaxed break-words">{text}</p>

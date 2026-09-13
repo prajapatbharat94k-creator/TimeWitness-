@@ -5,125 +5,96 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, Mic, Volume2, Send, Shield, RefreshCw } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Figure {
   id: string;
-  nameEn: string;
-  nameHi: string;
-  titleEn: string;
-  titleHi: string;
+  name: string; // Internal/EN name
+  title: string;
   era: string;
   avatar: string;
   greetingEn: string;
-  greetingHi: string;
 }
 
 const HISTORICAL_FIGURES: Figure[] = [
   {
     id: 'shivaji',
-    nameEn: 'Chhatrapati Shivaji Maharaj',
-    nameHi: 'छत्रपति शिवाजी महाराज',
-    titleEn: 'Founder of the Maratha Empire',
-    titleHi: 'मराठा साम्राज्य के संस्थापक',
+    name: 'Chhatrapati Shivaji Maharaj',
+    title: 'Founder of the Maratha Empire',
     era: '1630 – 1680 AD',
     avatar: 'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'Greetings, traveler. I welcome you to Raigad. What query brings you to speak with the Chhatrapati?',
-    greetingHi: 'नमस्कार, यात्री। रायगढ़ में आपका स्वागत है। छत्रपति से बात करने की क्या इच्छा है?',
   },
   {
     id: 'lakshmibai',
-    nameEn: 'Rani Lakshmibai',
-    nameHi: 'रानी लक्ष्मीबाई',
-    titleEn: 'Queen of Jhansi & Revolutionary Leader',
-    titleHi: 'झांसी की रानी एवं महान क्रांतीकारी',
+    name: 'Rani Lakshmibai',
+    title: 'Queen of Jhansi & Revolutionary Leader',
     era: '1828 – 1858 AD',
     avatar: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'I stand atop Jhansi ramparts. Speak swiftly—the cannons are being primed, but I shall hear your voice.',
-    greetingHi: 'मैं झांसी के प्राचीर पर खड़ी हूं। शीघ्र कहें—तोपें तैयार की जा रही हैं, पर मैं आपकी बात सुनूंगी।',
   },
   {
     id: 'napoleon',
-    nameEn: 'Napoleon Bonaparte',
-    nameHi: 'नेपोलियन बोनापार्ट',
-    titleEn: 'Emperor of the French',
-    titleHi: 'फ्रांसीसी सम्राट',
+    name: 'Napoleon Bonaparte',
+    title: 'Emperor of the French',
     era: '1769 – 1821 AD',
     avatar: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'Impossible is a word found only in the dictionary of fools. Ask your question regarding military strategy or statecraft.',
-    greetingHi: 'असंभव शब्द केवल मूर्खों के शब्दकोश में मिलता है। सैन्य रणनीति या शासनकला पर अपना प्रश्न पूछें।',
   },
   {
     id: 'cleopatra',
-    nameEn: 'Cleopatra VII',
-    nameHi: 'क्लिओपेट्रा सातवीं',
-    titleEn: 'Pharaoh of Ptolemaic Egypt',
-    titleHi: 'मिस्र की महारानी',
+    name: 'Cleopatra VII',
+    title: 'Pharaoh of Ptolemaic Egypt',
     era: '69 – 30 BC',
     avatar: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'Welcome to Alexandria. Step forward into the hall of Ptolemies and speak.',
-    greetingHi: 'अलेक्जेंड्रिया में आपका स्वागत है। टोलमी के दरबार में आगे आएं और अपनी बात रखें।',
   },
   {
     id: 'gandhi',
-    nameEn: 'Mahatma Gandhi',
-    nameHi: 'महात्मा गांधी',
-    titleEn: 'Father of the Nation & Apostle of Non-Violence',
-    titleHi: 'राष्ट्रपिता एवं अहिंसा के अग्रदूत',
+    name: 'Mahatma Gandhi',
+    title: 'Father of the Nation & Apostle of Non-Violence',
     era: '1869 – 1948 AD',
     avatar: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'Namaste, my friend. Truth and non-violence are my guideposts. What thoughts wish you to share today?',
-    greetingHi: 'नमस्ते मेरे मित्र। सत्य और अहिंसा ही मेरा मार्ग हैं। आज आप किस विषय पर विचार-विमर्श करना चाहते हैं?',
   },
   {
     id: 'armstrong',
-    nameEn: 'Neil Armstrong',
-    nameHi: 'नील आर्मस्ट्रांग',
-    titleEn: 'Apollo 11 Commander & Lunar Explorer',
-    titleHi: 'अपोलो ११ कमांडर एवं चंद्रमा अन्वेषक',
+    name: 'Neil Armstrong',
+    title: 'Apollo 11 Commander & Lunar Explorer',
     era: '1930 – 2012 AD',
     avatar: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=200&auto=format&fit=crop',
     greetingEn: 'Tranquility Base here. The Eagle has landed. What coordinates of the lunar voyage would you like to explore?',
-    greetingHi: 'ट्रैंक्विलिटी बेस से संदेश। द ईगल उतर चुका है। चंद्र यात्रा के किस पहलू पर आप बात करना चाहते हैं?',
   },
 ];
 
 const matchHistoricalFigure = (query?: string): Figure => {
   if (!query) return HISTORICAL_FIGURES[0];
   const q = query.toLowerCase();
-  if (q.includes('shivaji') || q.includes('maratha') || q.includes('raigad') || q.includes('swarajya')) {
-    return HISTORICAL_FIGURES[0];
-  }
-  if (q.includes('lakshmibai') || q.includes('jhansi') || q.includes('1857')) {
-    return HISTORICAL_FIGURES[1];
-  }
-  if (q.includes('napoleon') || q.includes('bonaparte') || q.includes('waterloo') || q.includes('french')) {
-    return HISTORICAL_FIGURES[2];
-  }
-  if (q.includes('cleopatra') || q.includes('egypt') || q.includes('alexandria') || q.includes('pharaoh')) {
-    return HISTORICAL_FIGURES[3];
-  }
-  if (q.includes('gandhi') || q.includes('dandi') || q.includes('salt') || q.includes('satyagraha')) {
-    return HISTORICAL_FIGURES[4];
-  }
-  if (q.includes('apollo') || q.includes('armstrong') || q.includes('moon') || q.includes('lunar') || q.includes('space')) {
-    return HISTORICAL_FIGURES[5];
-  }
+  if (q.includes('shivaji') || q.includes('maratha') || q.includes('raigad') || q.includes('swarajya')) return HISTORICAL_FIGURES[0];
+  if (q.includes('lakshmibai') || q.includes('jhansi') || q.includes('1857')) return HISTORICAL_FIGURES[1];
+  if (q.includes('napoleon') || q.includes('bonaparte') || q.includes('waterloo') || q.includes('french')) return HISTORICAL_FIGURES[2];
+  if (q.includes('cleopatra') || q.includes('egypt') || q.includes('alexandria') || q.includes('pharaoh')) return HISTORICAL_FIGURES[3];
+  if (q.includes('gandhi') || q.includes('dandi') || q.includes('salt') || q.includes('satyagraha')) return HISTORICAL_FIGURES[4];
+  if (q.includes('apollo') || q.includes('armstrong') || q.includes('moon') || q.includes('lunar') || q.includes('space')) return HISTORICAL_FIGURES[5];
   return HISTORICAL_FIGURES[0];
 };
 
 interface TalkToHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentLang: 'EN' | 'HI';
   defaultFigure?: string;
+  initialTopic?: string;
+  initialFigureId?: string;
 }
 
-export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defaultFigure }: TalkToHistoryModalProps) {
-  const [selectedFigure, setSelectedFigure] = useState<Figure>(() => matchHistoricalFigure(defaultFigure));
+export default function TalkToHistoryModal({ isOpen, onClose, defaultFigure, initialTopic, initialFigureId }: TalkToHistoryModalProps) {
+  const { t, currentLang, languageInfo } = useLanguage();
+  const figureQuery = defaultFigure || initialTopic || initialFigureId;
+  const [selectedFigure, setSelectedFigure] = useState<Figure>(() => matchHistoricalFigure(figureQuery));
   const [messages, setMessages] = useState<Array<{ sender: 'user' | 'figure'; text: string }>>([
     {
       sender: 'figure',
-      text: currentLang === 'EN' ? selectedFigure.greetingEn : selectedFigure.greetingHi,
+      text: selectedFigure.greetingEn,
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -131,15 +102,15 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (defaultFigure) {
-      const matched = matchHistoricalFigure(defaultFigure);
+    if (figureQuery) {
+      const matched = matchHistoricalFigure(figureQuery);
       setSelectedFigure(matched);
       setMessages([{
         sender: 'figure',
-        text: currentLang === 'EN' ? matched.greetingEn : matched.greetingHi,
+        text: matched.greetingEn,
       }]);
     }
-  }, [defaultFigure, currentLang]);
+  }, [figureQuery]);
 
   useEffect(() => {
     return () => {
@@ -153,41 +124,9 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+      utterance.lang = languageInfo.ttsLocale;
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  const getFallbackReply = (userMsg: string) => {
-    if (selectedFigure.id === 'shivaji') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": Freedom and Swarajya are built upon righteousness, naval vigilance, and fortifying the motherland for future generations.`
-        : `"${userMsg}" के संदर्भ में: स्वराज्य की नींव धर्म, नौसेना की सतर्कता और भावी पीढ़ियों के लिए मातृभूमि को सशक्त बनाने पर टिकी है।`;
-    } else if (selectedFigure.id === 'lakshmibai') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": We shall fight till our last breath! Bravery and unity will always shatter imperial tyranny.`
-        : `"${userMsg}" के संदर्भ में: हम अंतिम सांस तक लड़ेंगे! मातृभूमि के स्वाभिमान की रक्षा में भय का कोई स्थान नहीं।`;
-    } else if (selectedFigure.id === 'napoleon') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": Victory belongs to the most persevering. Discipline, timing, and bold maneuver decide the destiny of empires.`
-        : `"${userMsg}" के संदर्भ में: विजय उसी की होती है जो सबसे अधिक दृढ़ रहता है। अनुशासन और सही समय ही साम्राज्य का भाग्य तय करते हैं।`;
-    } else if (selectedFigure.id === 'cleopatra') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": True sovereign power is governed by intellect, diplomatic mastery, and navigating alliances with unwavering poise.`
-        : `"${userMsg}" के संदर्भ में: संप्रभु सत्ता केवल सेनाओं से नहीं, बल्कि कूटनीति, तीक्ष्ण बुद्धि और गरिमापूर्ण संकल्प से चलाई जाती है।`;
-    } else if (selectedFigure.id === 'gandhi') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": In a gentle way, you can shake the world. Truth alone triumphs, and persistent non-violence conquers hatred.`
-        : `"${userMsg}" के संदर्भ में: विनम्रता से आप संपूर्ण विश्व को हिला सकते हैं। सत्य की ही विजय होती है और अहिंसा ही स्थायी परिवर्तन लाती है।`;
-    } else if (selectedFigure.id === 'armstrong') {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": That's one small step for man, one giant leap for mankind. Curiosity and collective human perseverance conquered the frontier.`
-        : `"${userMsg}" के संदर्भ में: यह मनुष्य का एक छोटा सा कदम है, लेकिन मानवजाति के लिए एक विशाल छलांग है। विज्ञान और अटूट संकल्प ही नई सीमाओं को जीतते हैं।`;
-    } else {
-      return currentLang === 'EN'
-        ? `Regarding "${userMsg}": History is written by those who dare to forge their own fate.`
-        : `"${userMsg}" के संदर्भ में: इतिहास वही रचते हैं जो अपने भाग्य का निर्माण स्वयं करते हैं।`;
     }
   };
 
@@ -234,7 +173,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+      recognition.lang = languageInfo.ttsLocale;
       recognition.continuous = false;
       recognition.interimResults = false;
 
@@ -267,9 +206,9 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           figureId: selectedFigure.id,
-          figureName: currentLang === 'EN' ? selectedFigure.nameEn : selectedFigure.nameHi,
+          figureName: selectedFigure.name,
           message: userMsg,
-          language: currentLang,
+          language: languageInfo.nativeName, // Send the full language name to the backend
         }),
       });
 
@@ -278,12 +217,12 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
       }
 
       const data = await res.json();
-      const reply = data.reply || getFallbackReply(userMsg);
+      const reply = data.reply || `I am ${selectedFigure.name}, and I have received your message.`;
       setMessages(prev => [...prev, { sender: 'figure', text: reply }]);
       setIsLoading(false);
       playVoice(reply);
     } catch {
-      const reply = getFallbackReply(userMsg);
+      const reply = `I am ${selectedFigure.name}, and I have received your message.`;
       setMessages(prev => [...prev, { sender: 'figure', text: reply }]);
       setIsLoading(false);
       playVoice(reply);
@@ -308,7 +247,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                   <div className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-[#D4AF37]" />
                     <span className="font-cinzel text-lg font-bold text-[#F8FAFC]">
-                      {currentLang === 'EN' ? 'Talk to History' : 'इतिहास संवाद'}
+                      {t('talkModalTitle')}
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-extrabold text-[#D4AF37]">
@@ -317,30 +256,13 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                 </div>
 
                 <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider block mb-3">
-                  {currentLang === 'EN' ? 'Select Historical Personality' : 'ऐतिहासिक व्यक्तित्व चुनें'}
+                  {t('talkModalSubtitle')}
                 </span>
 
-                {/* Quick Starter Question Pills */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['What was your biggest strategy?', 'How did you overcome your main enemy?', 'What message do you have for the future?'].map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setInputText(q);
-                      }}
-                      className="px-3 py-1 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-medium text-[#D4AF37] hover:bg-[#D4AF37]/30 text-left"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Figure Buttons */}
-                <div className="space-y-2 max-h-[280px] md:max-h-[420px] overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-[280px] md:max-h-[420px] overflow-y-auto pr-1 mt-4">
                   {HISTORICAL_FIGURES.map((fig) => {
                     const isSelected = selectedFigure.id === fig.id;
-                    const name = currentLang === 'EN' ? fig.nameEn : fig.nameHi;
-                    const title = currentLang === 'EN' ? fig.titleEn : fig.titleHi;
 
                     return (
                       <button
@@ -352,7 +274,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                           setSelectedFigure(fig);
                           setMessages([{
                             sender: 'figure',
-                            text: currentLang === 'EN' ? fig.greetingEn : fig.greetingHi,
+                            text: fig.greetingEn,
                           }]);
                         }}
                         className={`w-full text-left p-2.5 rounded-2xl flex items-center gap-3 transition-all ${
@@ -363,25 +285,20 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                       >
                         <Image
                           src={fig.avatar}
-                          alt={name}
+                          alt={fig.name}
                           width={40}
                           height={40}
                           className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]/40 shrink-0"
                         />
                         <div className="overflow-hidden">
-                          <h4 className="text-xs font-bold truncate text-[#F8FAFC]">{name}</h4>
-                          <p className="text-[10px] text-[#64748B] truncate">{title}</p>
+                          <h4 className="text-xs font-bold truncate text-[#F8FAFC]">{fig.name}</h4>
+                          <p className="text-[10px] text-[#64748B] truncate">{fig.title}</p>
                           <span className="text-[9px] text-[#D4AF37] font-mono block mt-0.5">{fig.era}</span>
                         </div>
                       </button>
                     );
                   })}
                 </div>
-              </div>
-
-              <div className="pt-4 border-t border-[#242434] text-[11px] text-[#64748B] flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>Voice synthesized from historical memoirs</span>
               </div>
             </div>
 
@@ -394,7 +311,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                   <div className="relative">
                     <Image
                       src={selectedFigure.avatar}
-                      alt={selectedFigure.nameEn}
+                      alt={selectedFigure.name}
                       width={40}
                       height={40}
                       className="w-10 h-10 rounded-full object-cover border border-[#D4AF37]"
@@ -403,7 +320,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                   </div>
                   <div>
                     <h3 className="font-cinzel text-base font-bold text-[#F8FAFC]">
-                      {currentLang === 'EN' ? selectedFigure.nameEn : selectedFigure.nameHi}
+                      {selectedFigure.name}
                     </h3>
                     <span className="text-xs text-[#D4AF37]">{selectedFigure.era}</span>
                   </div>
@@ -451,9 +368,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                       <div className="flex items-center gap-2 text-[#D4AF37]">
                         <RefreshCw className="w-4 h-4 animate-spin" />
                         <span className="text-sm font-mono animate-pulse">
-                          {currentLang === 'EN'
-                            ? `${selectedFigure.nameEn.split(' ')[0]} is consulting memoirs...`
-                            : `${selectedFigure.nameHi} विचारमंथन कर रहे हैं...`}
+                          {t('generating')}
                         </span>
                       </div>
                     </div>
@@ -471,7 +386,6 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                         ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' 
                         : 'text-[#64748B] hover:text-[#D4AF37]'
                     }`}
-                    title={isRecording ? 'Listening... click to stop' : 'Voice Input (Click to speak)'}
                   >
                     <Mic className="w-5 h-5" />
                   </button>
@@ -481,11 +395,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder={
-                      currentLang === 'EN'
-                        ? `Ask ${selectedFigure.nameEn.split(' ')[0]} anything about their life or era...`
-                        : `${selectedFigure.nameHi} से उनके जीवन या युग के बारे में कुछ भी पूछें...`
-                    }
+                    placeholder={t('typeMessage')}
                     className="w-full bg-transparent text-[#F8FAFC] placeholder-[#64748B] text-xs sm:text-sm focus:outline-none px-2"
                   />
 

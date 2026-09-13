@@ -187,13 +187,35 @@ export async function getSources(experienceId: string): Promise<DbSource[]> {
   }
 }
 
+import {
+  getUserFavorites,
+  setUserFavorite,
+  getUserSaved,
+  setUserSaved,
+  getUserHistory,
+  addUserHistory,
+  getUserActivities,
+  getLocalProfile,
+  updateLocalProfile,
+  ExperienceCardData,
+  ActivityEntry
+} from './localStorage';
+
+export type { ExperienceCardData, ActivityEntry };
+
 /**
- * Record a user history entry (no-op if not authenticated).
+ * Record a user history entry (graceful offline / Supabase).
  */
 export async function recordUserHistory(
   userId: string | null,
-  experienceId: string
+  experienceId: string,
+  cardData?: ExperienceCardData
 ): Promise<void> {
+  // Always update local cache/history
+  if (cardData) {
+    addUserHistory(cardData, userId);
+  }
+
   const supabase = getSupabaseClient();
   if (!supabase || !userId) return;
 
@@ -203,6 +225,208 @@ export async function recordUserHistory(
       { onConflict: 'user_id,experience_id' }
     );
   } catch {
-    // Silent — non-critical
+    // Silent fallback
   }
 }
+
+/** Profile and Preferences */
+export interface DbProfile {
+  id: string;
+  name: string | null;
+  avatar_url: string | null;
+  language: string;
+  voice_enabled: boolean;
+  autoplay: boolean;
+  theme: string;
+}
+
+export async function getProfile(userId: string): Promise<DbProfile> {
+  const localProf = getLocalProfile(userId);
+  const supabase = getSupabaseClient();
+  if (!supabase) return localProf;
+
+  try {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (error || !data) return localProf;
+    return {
+      ...localProf,
+      ...data,
+    };
+  } catch {
+    return localProf;
+  }
+}
+
+export async function updateProfile(userId: string, updates: Partial<DbProfile>): Promise<boolean> {
+  // Save locally first
+  updateLocalProfile(userId, updates);
+
+  const supabase = getSupabaseClient();
+  if (!supabase) return true;
+
+  try {
+    const { error } = await supabase.from('profiles').upsert({ id: userId, ...updates, updated_at: new Date().toISOString() });
+    return !error;
+  } catch {
+    return true; // Local update was successful
+  }
+}
+
+/** Favorites */
+export async function getFavorites(userId: string): Promise<ExperienceCardData[]> {
+  const localData = getUserFavorites(userId);
+  const supabase = getSupabaseClient();
+  if (!supabase) return localData;
+
+  try {
+    const { data, error } = await supabase
+      .from('favorites')
+      .select('*, historical_experiences(*)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) return localData;
+    return data.map(d => ({
+      id: d.historical_experiences?.id || d.experience_id,
+      title: d.historical_experiences?.title || 'Historical Event',
+      subject: d.historical_experiences?.subject || d.historical_experiences?.title || 'History',
+      year: d.historical_experiences?.year || undefined,
+      location: d.historical_experiences?.location || undefined,
+      cover_image: d.historical_experiences?.cover_image || undefined,
+      slug: d.historical_experiences?.slug || d.experience_id,
+      added_at: d.created_at,
+    }));
+  } catch {
+    return localData;
+  }
+}
+
+export async function toggleFavorite(
+  userId: string, 
+  experienceId: string, 
+  isFavorite: boolean,
+  cardData?: ExperienceCardData
+): Promise<boolean> {
+  if (cardData) {
+    setUserFavorite(cardData, isFavorite, userId);
+  } else {
+    setUserFavorite({
+      id: experienceId,
+      title: experienceId,
+      subject: experienceId,
+      slug: experienceId,
+    }, isFavorite, userId);
+  }
+
+  const supabase = getSupabaseClient();
+  if (!supabase) return true;
+
+  try {
+    if (isFavorite) {
+      const { error } = await supabase.from('favorites').insert({ user_id: userId, experience_id: experienceId });
+      return !error;
+    } else {
+      const { error } = await supabase.from('favorites').delete().match({ user_id: userId, experience_id: experienceId });
+      return !error;
+    }
+  } catch {
+    return true;
+  }
+}
+
+/** Saved Experiences */
+export async function getSavedExperiences(userId: string): Promise<ExperienceCardData[]> {
+  const localData = getUserSaved(userId);
+  const supabase = getSupabaseClient();
+  if (!supabase) return localData;
+
+  try {
+    const { data, error } = await supabase
+      .from('saved_experiences')
+      .select('*, historical_experiences(*)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) return localData;
+    return data.map(d => ({
+      id: d.historical_experiences?.id || d.experience_id,
+      title: d.historical_experiences?.title || 'Historical Event',
+      subject: d.historical_experiences?.subject || d.historical_experiences?.title || 'History',
+      year: d.historical_experiences?.year || undefined,
+      location: d.historical_experiences?.location || undefined,
+      cover_image: d.historical_experiences?.cover_image || undefined,
+      slug: d.historical_experiences?.slug || d.experience_id,
+      added_at: d.created_at,
+    }));
+  } catch {
+    return localData;
+  }
+}
+
+export async function toggleSaved(
+  userId: string, 
+  experienceId: string, 
+  isSaved: boolean,
+  cardData?: ExperienceCardData
+): Promise<boolean> {
+  if (cardData) {
+    setUserSaved(cardData, isSaved, userId);
+  } else {
+    setUserSaved({
+      id: experienceId,
+      title: experienceId,
+      subject: experienceId,
+      slug: experienceId,
+    }, isSaved, userId);
+  }
+
+  const supabase = getSupabaseClient();
+  if (!supabase) return true;
+
+  try {
+    if (isSaved) {
+      const { error } = await supabase.from('saved_experiences').insert({ user_id: userId, experience_id: experienceId });
+      return !error;
+    } else {
+      const { error } = await supabase.from('saved_experiences').delete().match({ user_id: userId, experience_id: experienceId });
+      return !error;
+    }
+  } catch {
+    return true;
+  }
+}
+
+/** History Details */
+export async function getUserHistoryDetails(userId: string): Promise<ExperienceCardData[]> {
+  const localData = getUserHistory(userId);
+  const supabase = getSupabaseClient();
+  if (!supabase) return localData;
+
+  try {
+    const { data, error } = await supabase
+      .from('user_history')
+      .select('*, historical_experiences(*)')
+      .eq('user_id', userId)
+      .order('last_viewed_at', { ascending: false });
+
+    if (error || !data || data.length === 0) return localData;
+    return data.map(d => ({
+      id: d.historical_experiences?.id || d.experience_id,
+      title: d.historical_experiences?.title || 'Historical Event',
+      subject: d.historical_experiences?.subject || d.historical_experiences?.title || 'History',
+      year: d.historical_experiences?.year || undefined,
+      location: d.historical_experiences?.location || undefined,
+      cover_image: d.historical_experiences?.cover_image || undefined,
+      slug: d.historical_experiences?.slug || d.experience_id,
+      last_viewed_at: d.last_viewed_at,
+    }));
+  } catch {
+    return localData;
+  }
+}
+
+/** Fetch user activities */
+export async function getUserActivityHistory(userId: string): Promise<ActivityEntry[]> {
+  return getUserActivities(userId);
+}
+

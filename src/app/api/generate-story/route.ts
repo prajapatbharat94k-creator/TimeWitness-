@@ -39,77 +39,183 @@ function validateAndFixScenes(raw: unknown): HistoricalScene[] | null {
 
 // ─── Fallback ────────────────────────────────────────────────────────────────
 
-function generateFallbackScenes(topic: string, language: string): HistoricalScene[] {
-  const isHindi = language === 'HI' || /[\u0900-\u097F]/.test(topic);
+// ─── Supported Languages ───────────────────────────────────────────────────
+
+const SUPPORTED_LANGUAGES: Record<string, { code: string; name: string; nativeName: string }> = {
+  EN: { code: 'EN', name: 'English', nativeName: 'English' },
+  HI: { code: 'HI', name: 'Hindi', nativeName: 'हिन्दी' },
+  MR: { code: 'MR', name: 'Marathi', nativeName: 'मराठी' },
+  TE: { code: 'TE', name: 'Telugu', nativeName: 'తెలుగు' },
+  GU: { code: 'GU', name: 'Gujarati', nativeName: 'ગુજરાતી' },
+  TA: { code: 'TA', name: 'Tamil', nativeName: 'தமிழ்' },
+  BN: { code: 'BN', name: 'Bengali', nativeName: 'বাংলা' },
+};
+
+function resolveLanguage(langInput: unknown): { code: string; name: string; nativeName: string } {
+  if (typeof langInput !== 'string') return SUPPORTED_LANGUAGES.EN;
+  const upper = langInput.trim().toUpperCase();
+  if (SUPPORTED_LANGUAGES[upper]) return SUPPORTED_LANGUAGES[upper];
+
+  const lower = langInput.trim().toLowerCase();
+  for (const item of Object.values(SUPPORTED_LANGUAGES)) {
+    if (item.name.toLowerCase() === lower || item.nativeName.toLowerCase() === lower) {
+      return item;
+    }
+  }
+  return SUPPORTED_LANGUAGES.EN;
+}
+
+// ─── Fallback ────────────────────────────────────────────────────────────────
+
+function generateFallbackScenes(topic: string, langCode: string): HistoricalScene[] {
+  const isHi = langCode === 'HI';
+  const isMr = langCode === 'MR';
+  const isGu = langCode === 'GU';
+  const isTe = langCode === 'TE';
+  const isTa = langCode === 'TA';
+  const isBn = langCode === 'BN';
+
+  const t1 = isHi ? 'आरंभ और बाल्यकाल' :
+             isMr ? 'सुरुवात आणि बालपण' :
+             isGu ? 'શરૂઆત અને બાળપણ' :
+             isTe ? 'ప్రారంభం మరియు బాల్యం' :
+             isTa ? 'தொடக்கமும் இளமைக்காலமும்' :
+             isBn ? 'সূচনা ও বাল্যকাল' : 'Origin & Shadows of Youth';
+
+  const n1 = isHi ? `आप उस युग के गवाह हैं जहां ${topic} की कहानी शुरू हुई। किले के आंगन में हवा प्राचीन प्रार्थनाओं के साथ बहती है।` :
+             isMr ? `तुम्ही त्या युगाचे साक्षीदार आहात जिथे ${topic} ची गाथा सुरू झाली. किल्ल्याच्या आवारात प्राचीन मंत्रांचे स्वर घुमतात.` :
+             isGu ? `તમે એ યુગના સાક્ષી છો જ્યાં ${topic} ની ગાથા શરૂ થઈ. કિલ્લાના આંગણામાં પ્રાચીન પવન વાય છે.` :
+             isTe ? `మీరు ${topic} కథ ప్రారంభమైన యుగానికి సాక్షులు. పురాతన కోట ప్రాంగణంలో పవిత్ర గాలి వీస్తుంది.` :
+             isTa ? `${topic} இன் வரலாறு தொடங்கிய காலத்தை நீங்கள் நேரில் காண்கிறீர்கள். கோட்டையின் சுவர்களில் வரலாறு எதிரொலிக்கிறது.` :
+             isBn ? `আপনি সেই যুগের সাক্ষী যেখানে ${topic}-এর উপাখ্যান শুরু হয়েছিল। দুর্গের প্রাঙ্গণে বয়ে যায় প্রাচীন ইতিহাস.` :
+             `You stand in the quiet shadows where the saga of ${topic} begins. The wind across ancient walls whispers of destiny.`;
+
+  const t2 = isHi ? 'सत्ता का उदय और प्रथम संघर्ष' :
+             isMr ? 'सत्तेचा उदय आणि पहिला संघर्ष' :
+             isGu ? 'સત્તાનો ઉદય અને પ્રથમ સંઘર્ષ' :
+             isTe ? 'అధికార పెరుగుదల మరియు మొదటి పోరాటం' :
+             isTa ? 'அதிகார எழுச்சியும் முதல் போரும்' :
+             isBn ? 'ক্ষমতার উত্থান ও প্রথম সংঘাত' : 'Rise to Power & First Battles';
+
+  const n2 = isHi ? 'जैसे-जैसे समय बीतता है, आप तलवारों की गूंज और शपथ की आवाज सुनते हैं।' :
+             isMr ? 'काळ जसजसा पुढे सरकतो, तसतशी तलवारींची खणखणाट आणि स्वराज्याची प्रतिज्ञा कानावर पडते.' :
+             isGu ? 'સમય વીતતાની સાથે, તમે તલવારોના રણકાર અને શપથનો અવાજ સાંભળો છો.' :
+             isTe ? 'కాలం గడిచేకొద్దీ, మీరు కత్తుల శబ్దం మరియు పవిత్ర ప్రమాణాలను వింటారు.' :
+             isTa ? 'காலம் நகர, வாட்களின் ஒலியும் விடுதலை உறுதிமொழியும் காதில் விழுகின்றன.' :
+             isBn ? 'সময় গড়ানোর সাথে সাথে আপনি তরবারির ঝংকার এবং প্রতিজ্ঞার ধ্বনি শুনতে পান।' :
+             `As the years unfold, you hear the clash of steel and sacred oaths. Banners rise across rugged hills.`;
+
+  const t3 = isHi ? 'चरम मोड़ और धर्मयुद्ध' :
+             isMr ? 'निर्णायक वळण आणि रणनीती' :
+             isGu ? 'નિર્ણાયક વળાંક અને યુદ્ધ' :
+             isTe ? 'కీలక మలుపు మరియు వ్యూహం' :
+             isTa ? 'திருப்பமுனையும் போர் உத்தியும்' :
+             isBn ? 'চূড়ান্ত মোড় ও সমরনীতি' : 'The Defining Climax & Siege';
+
+  const n3 = isHi ? 'अब आप निर्णायक क्षण के बीच खड़े हैं। एक साहसी फैसला साम्राज्य का भाग्य बदल देता है।' :
+             isMr ? 'आता तुम्ही एका निर्णायक क्षणाचे साक्षीदार आहात. एका धाडसी निर्णयाने साम्राज्याचे भाग्य बदलले.' :
+             isGu ? 'હવે તમે નિર્ણાયક ક્ષણના સાક્ષી છો. એક સાહસી નિર્ણય સામ્રાજ્યનું ભાગ્ય બદલી નાખે છે.' :
+             isTe ? 'ఇప్పుడు మీరు ఒక కీలక ఘట్టాన్ని చూస్తున్నారు. ఒక సాహసోపేత నిర్ణయం సామ్రాజ్య భవితవ్యాన్ని మారుస్తుంది.' :
+             isTa ? 'இப்போது நீங்கள் ஒரு திருப்புமுனைக் கணத்தில் நிற்கிறீர்கள். ஒரு தீர்க்கமான முடிவு பேரரசின் விதியை மாற்றுகிறது.' :
+             isBn ? 'এখন আপনি এক চূড়ান্ত মুহূর্তে দাঁড়িয়ে আছেন। একটি সাহসী সিদ্ধান্ত সাম্রাজ্যের ভাগ্য নির্ধারণ করে।' :
+             `You witness the ultimate turning point. A daring tactical stroke determines the fate of empires.`;
+
+  const t4 = isHi ? 'महान विजय और राज्याभिषेक' :
+             isMr ? 'भव्य विजय आणि राज्याभिषेक' :
+             isGu ? 'ભવ્ય વિજય અને રાજ્યાભિષેક' :
+             isTe ? 'గొప్ప విజయం మరియు పట్టాభిషేకం' :
+             isTa ? 'பெருவெற்றியும் மணிமுடியும்' :
+             isBn ? 'মহাবিজয় ও রাজ্যাভিষেক' : 'Sovereign Victory & Triumph';
+
+  const n4 = isHi ? 'शंखध्वनि गूंजती है और विजय का झंडा फहराता है।' :
+             isMr ? 'जयघोष घुमतो, तुतारी वाजते आणि स्वराज्याचे भगवे निशाण अभिमानाने फडकते.' :
+             isGu ? 'શંખનાદ ગુંજે છે અને વિજય પતાકા લહેરાય છે.' :
+             isTe ? 'శంఖారావం మోగుతుంది, విజయ పతాకం సగర్వంగా ఎగురుతుంది.' :
+             isTa ? 'சங்கு முழங்குகிறது, வெற்றி கொடி கம்பீரமாகப் பறக்கிறது.' :
+             isBn ? 'শঙ্খধ্বনি বেজে ওঠে এবং বিজয়ের পতাকা আকাশে ওড়ে।' :
+             `Trumpets echo across mountain peaks as victory is claimed. Golden coins shower the crowds.`;
+
+  const t5 = isHi ? 'अमर विरासत और इतिहास में स्थान' :
+             isMr ? 'अमर वारसा आणि चिरंतन प्रेरणा' :
+             isGu ? 'અમર વારસો અને ઇતિહાસમાં સ્થાન' :
+             isTe ? 'శాశ్వత వారసత్వం మరియు చరిత్రలో స్థానం' :
+             isTa ? 'அழியாத பாரம்பரியமும் வரலாற்றுப் பதிவும்' :
+             isBn ? 'অমর ঐতিহ্য ও চিরন্তন প্রভাব' : 'Immortal Legacy & Eternal Impact';
+
+  const n5 = isHi ? `सदियों बाद भी, ${topic} के पदचिह्न इतिहास के पन्नों पर अंकित हैं।` :
+             isMr ? `शतके उलटली तरी, ${topic} चे विचार आणि कार्य इतिहासाच्या पानांवर सुवर्णाक्षरांनी कोरलेले आहे.` :
+             isGu ? `સદીઓ પછી પણ, ${topic} નો પ્રભાવ ઇતિહાસના પાનાઓ પર અમર છે.` :
+             isTe ? `శతాబ్దాలు గడిచినా, ${topic} యొక్క కీర్తి చరిత్రలో నిలిచి ఉంటుంది.` :
+             isTa ? `நூற்றாண்டுகள் கடந்தாலும், ${topic} இன் பெருமை வரலாற்றில் நிலைத்து நிற்கிறது.` :
+             isBn ? `শতাব্দীর পর শতাব্দী পেরিয়েও, ${topic}-এর পদচিহ্ন ইতিহাসে চিরভাস্বর হয়ে রয়েছে।` :
+             `Centuries fade, yet the echoes of ${topic} resonate across generations. You stand amidst enduring monuments.`;
+
+  const factLabel = isHi ? `${topic} के प्रमाण ऐतिहासिक अभिलेखों में सुरक्षित हैं।` :
+                    isMr ? `${topic} विषयीचे ऐतिहासिक संदर्भ साधनांमध्ये उपलब्ध आहेत.` :
+                    isGu ? `${topic} ના ઐતિહાસિક પુરાવા દસ્તાવેજોમાં ઉપલબ્ધ છે.` :
+                    isTe ? `${topic} గురించిన చారిత్రక ఆధారాలు అందుబాటులో ఉన్నాయి.` :
+                    isTa ? `${topic} பற்றிய வரலாற்று ஆவணங்கள் பாதுகாக்கப்பட்டுள்ளன.` :
+                    isBn ? `${topic} সম্পর্কিত ঐতিহাসিক প্রমাণ নথিপত্রে সংরক্ষিত রয়েছে।` :
+                    `Historical records document key chronological moments of ${topic}.`;
+
+  const reconLabel = isHi ? 'यह दृश्य ऐतिहासिक स्रोतों पर आधारित AI पुनर्निर्माण है।' :
+                     isMr ? 'हे दृश्य ऐतिहासिक नोंदींवर आधारित AI पुनर्निर्माण आहे.' :
+                     isGu ? 'આ દ્રશ્ય ઐતિહાસિક પુરાવાઓ પર આધારિત AI પુનર્નિર્માણ છે.' :
+                     isTe ? 'ఈ దృశ్యం చారిత్రక రికార్డులపై ఆధారపడిన AI పునర్నిర్మాణం.' :
+                     isTa ? 'இந்தக் காட்சி வரலாற்றுப் பதிவுகளின் அடிப்படையிலான AI மறுசீரமைப்பு.' :
+                     isBn ? 'এই দৃশ্যটি ঐতিহাসিক তথ্যের ওপর ভিত্তি করে নির্মিত AI পুনর্গঠন।' :
+                     'This scene is an AI reconstruction grounded in preserved historical records.';
 
   return [
     {
       sceneNumber: 1,
       era: 'Origin & Early Life',
-      title: isHindi ? 'आरंभ और बाल्यकाल' : 'Origin & Shadows of Youth',
-      narration: isHindi
-        ? `आप उस युग के गवाह हैं जहां ${topic} की कहानी शुरू हुई। किले के आंगन में हवा प्राचीन प्रार्थनाओं के साथ बहती है।`
-        : `You stand in the quiet shadows where the saga of ${topic} begins. The wind across ancient walls whispers of destiny.`,
+      title: t1,
+      narration: n1,
       imagePrompt: `Cinematic historical artwork showing early life and origins of ${topic}, dramatic atmospheric lighting, photorealistic concept art.`,
       ambientTag: 'temple_bells_wind',
-      historicalFact: isHindi
-        ? `${topic} की उत्पत्ति और प्रारंभिक जीवन के बारे में ऐतिहासिक अभिलेख उपलब्ध हैं।`
-        : `Historical records document the early origins of ${topic}.`,
-      reconstructionNote: isHindi
-        ? 'यह दृश्य ऐतिहासिक अभिलेखों पर आधारित AI पुनर्निर्माण है।'
-        : 'This scene is an AI reconstruction based on historical records.',
+      historicalFact: factLabel,
+      reconstructionNote: reconLabel,
     },
     {
       sceneNumber: 2,
       era: 'Rise to Power',
-      title: isHindi ? 'सत्ता का उदय और प्रथम संघर्ष' : 'Rise to Power & First Battles',
-      narration: isHindi
-        ? 'जैसे-जैसे समय बीतता है, आप तलवारों की गूंज और शपथ की आवाज सुनते हैं।'
-        : `As the years unfold, you hear the clash of steel and sacred oaths. Banners rise across rugged hills.`,
+      title: t2,
+      narration: n2,
       imagePrompt: `Historical painting depicting rising power of ${topic}, torchlit army encampment, cinematic volumetric smoke.`,
       ambientTag: 'marching_drums',
-      historicalFact: `${isHindi ? 'इस काल में ' + topic + ' का उदय हुआ।' : `The rise of ${topic} is documented in historical chronicles.`}`,
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction of documented events.',
+      historicalFact: factLabel,
+      reconstructionNote: reconLabel,
     },
     {
       sceneNumber: 3,
       era: 'Defining Climax',
-      title: isHindi ? 'चरम मोड़ और धर्मयुद्ध' : 'The Defining Climax & Siege',
-      narration: isHindi
-        ? 'अब आप निर्णायक क्षण के बीच खड़े हैं। एक साहसी फैसला साम्राज्य का भाग्य बदल देता है।'
-        : `You witness the ultimate turning point. A daring tactical stroke determines the fate of empires.`,
+      title: t3,
+      narration: n3,
       imagePrompt: `Dramatic battle climax of ${topic}, historical armor details, fiery dusk sky, oil painting style.`,
       ambientTag: 'battle_horns_cannons',
-      historicalFact: isHindi ? 'यह निर्णायक घटना इतिहास में दर्ज है।' : 'This pivotal event is recorded in historical sources.',
-      simulationNote: isHindi
-        ? 'इस दृश्य में कुछ तत्व काल्पनिक हैं।'
-        : 'Some narrative elements in this scene are dramatized for immersion.',
+      historicalFact: factLabel,
+      simulationNote: 'Dramatized reconstruction of historical turning point.',
     },
     {
       sceneNumber: 4,
       era: 'Victory & Triumph',
-      title: isHindi ? 'महान विजय और राज्याभिषेक' : 'Sovereign Victory & Triumph',
-      narration: isHindi
-        ? 'शंखध्वनि गूंजती है और विजय का झंडा फहराता है।'
-        : `Trumpets echo across mountain peaks as victory is claimed. Golden coins shower the crowds.`,
+      title: t4,
+      narration: n4,
       imagePrompt: `Grand victory celebration of ${topic}, royal golden robes, grand palace architecture, warm sunlight.`,
       ambientTag: 'royal_fanfare',
-      historicalFact: isHindi ? 'यह विजय ऐतिहासिक अभिलेखों में दर्ज है।' : 'This victory is historically documented.',
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction of the documented triumph.',
+      historicalFact: factLabel,
+      reconstructionNote: reconLabel,
     },
     {
       sceneNumber: 5,
       era: 'Immortal Legacy',
-      title: isHindi ? 'अमर विरासत और इतिहास में स्थान' : 'Immortal Legacy & Eternal Impact',
-      narration: isHindi
-        ? `सदियों बाद भी, ${topic} के पदचिह्न इतिहास के पन्नों पर अंकित हैं।`
-        : `Centuries fade, yet the echoes of ${topic} resonate across generations. You stand amidst enduring monuments.`,
+      title: t5,
+      narration: n5,
       imagePrompt: `Majestic historical monument honoring the legacy of ${topic}, epic cinematic composition, golden hour lighting.`,
       ambientTag: 'palace_ambience',
-      historicalFact: isHindi
-        ? `${topic} की विरासत आज भी जीवित है।`
-        : `The legacy of ${topic} continues to influence history and culture.`,
-      reconstructionNote: isHindi ? 'AI पुनर्निर्माण।' : 'AI Reconstruction based on historical legacy.',
+      historicalFact: factLabel,
+      reconstructionNote: reconLabel,
     },
   ];
 }
@@ -118,7 +224,7 @@ function generateFallbackScenes(topic: string, language: string): HistoricalScen
 
 export async function POST(req: Request) {
   let requestedTopic = 'Historical Event';
-  let requestedLanguage = 'EN';
+  let resolvedLang = SUPPORTED_LANGUAGES.EN;
 
   try {
     let body: unknown;
@@ -143,7 +249,7 @@ export async function POST(req: Request) {
     }
 
     requestedTopic = sanitizeTopic(topic);
-    requestedLanguage = language === 'HI' ? 'HI' : 'EN';
+    resolvedLang = resolveLanguage(language);
 
     // ── Fast path 1: Check curated demo story dataset if no API key ───────────
     const apiKey = process.env.GEMINI_API_KEY;
@@ -157,7 +263,7 @@ export async function POST(req: Request) {
     }
 
     // ── Fast path 2: Check Supabase cache ─────────────────────────────────────
-    const cached = await getCachedExperience(requestedTopic, requestedLanguage);
+    const cached = await getCachedExperience(requestedTopic, resolvedLang.code);
     if (cached && cached.scenes.length > 0) {
       return NextResponse.json({
         scenes: cached.scenes,
@@ -168,7 +274,7 @@ export async function POST(req: Request) {
 
     // ── If no API key and no demo story: use structured fallback ──────────────
     if (!apiKey) {
-      const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
+      const fallbackData = generateFallbackScenes(requestedTopic, resolvedLang.code);
       return NextResponse.json({
         scenes: fallbackData,
         source: 'fallback',
@@ -176,12 +282,12 @@ export async function POST(req: Request) {
       });
     }
 
-    // ── Call Gemini with 8s timeout ──────────────────────────────────────────
+    // ── Call Gemini with 25s timeout ──────────────────────────────────────────
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `You are a world-class historical narrative engine for TimeWitness.
 Generate a structured 5-scene historical journey for the topic: "${requestedTopic}".
-Language requested for narration: ${requestedLanguage === 'HI' ? 'Hindi (हिन्दी)' : 'English'}.
+Target Language for narration & titles: ${resolvedLang.name} (${resolvedLang.nativeName}).
 
 Structure the journey into exactly 5 sequential historical scenes:
 Scene 1: Origin / Early Life
@@ -191,10 +297,14 @@ Scene 4: Victory / Major Triumph
 Scene 5: Legacy / Historical Impact
 
 For each scene, provide:
-- narration: Dramatic second-person storytelling ("You stand...", "You witness...") in ${requestedLanguage === 'HI' ? 'Hindi' : 'English'}
-- historicalFact: A single VERIFIED historical fact about this moment (do NOT fabricate — if uncertain, write "Source verification unavailable for this claim.")
-- reconstructionNote: Brief note on what is AI reconstructed / dramatized (label it "AI Historical Reconstruction")
-- simulationNote: If any element is hypothetical/simulated, note it here; else leave empty string
+- narration: Dramatic second-person storytelling ("You stand...", "You witness...") in authentic ${resolvedLang.name} (${resolvedLang.nativeName}) script.
+- title: Short dramatic scene headline in ${resolvedLang.name} (${resolvedLang.nativeName}).
+- era: Historical era and year (e.g. "1674 AD, Raigad Fort").
+- historicalFact: A single VERIFIED historical fact about this moment in ${resolvedLang.name} (do NOT fabricate — if uncertain, state "Source verification unavailable for this specific detail").
+- reconstructionNote: Brief disclosure note in ${resolvedLang.name} (e.g. "AI Historical Reconstruction").
+- simulationNote: If any element is hypothetical/simulated, note it here; else leave empty string.
+- imagePrompt: Detailed art prompt in English describing character, regalia, lighting, and architecture for cinematic visualization.
+- ambientTag: One soundscape tag from: "temple_bells_wind", "marching_drums", "battle_horns_cannons", "royal_fanfare", "palace_ambience".
 
 IMPORTANT: Never present invented dialogue as authentic historical quotes. Label all creative content clearly.
 Ensure strict JSON output conforming to the schema.`;
@@ -220,11 +330,11 @@ Ensure strict JSON output conforming to the schema.`;
     };
 
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 8000)
+      setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 25000)
     );
 
     const apiCallPromise = ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -249,7 +359,7 @@ Ensure strict JSON output conforming to the schema.`;
     }
 
     // Persist to Supabase / Local storage (non-blocking)
-    const experienceId = await saveExperience(requestedTopic, requestedLanguage, scenes);
+    const experienceId = await saveExperience(requestedTopic, resolvedLang.code, scenes);
 
     return NextResponse.json({
       scenes,
@@ -273,7 +383,7 @@ Ensure strict JSON output conforming to the schema.`;
       });
     }
 
-    const fallbackData = generateFallbackScenes(requestedTopic, requestedLanguage);
+    const fallbackData = generateFallbackScenes(requestedTopic, resolvedLang.code);
     return NextResponse.json({
       scenes: fallbackData,
       source: 'fallback',

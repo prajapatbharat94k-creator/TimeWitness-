@@ -1,207 +1,145 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, X, History, Compass, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-export interface SampleTag {
-  id: string;
-  labelEn: string;
-  labelHi: string;
-  era: string;
-  query: string;
-  imagePreview?: string;
-}
-
-export const SAMPLE_TAGS: SampleTag[] = [
-  {
-    id: '1',
-    labelEn: 'Coronation of Shivaji Maharaj',
-    labelHi: 'छत्रपति शिवाजी महाराज का राज्याभिषेक',
-    era: '1674 AD • Raigad Fort',
-    query: 'Coronation of Chhatrapati Shivaji Maharaj at Raigad Fort in 1674 AD',
-  },
-  {
-    id: '2',
-    labelEn: 'Rani Lakshmibai 1857',
-    labelHi: 'रानी लक्ष्मीबाई १८५७',
-    era: '1857 AD • Jhansi Fort',
-    query: 'Rani Lakshmibai leading defense at Jhansi Fort during 1857 war of independence',
-  },
-  {
-    id: '3',
-    labelEn: 'Napoleon at Waterloo',
-    labelHi: 'वाटरलू में नेपोलियन',
-    era: '1815 AD • Belgium',
-    query: 'Napoleon Bonaparte commanding the French army at the Battle of Waterloo in 1815',
-  },
-  {
-    id: '4',
-    labelEn: "Cleopatra's Reign",
-    labelHi: 'क्लिओपेट्रा का शासन',
-    era: '41 BC • Alexandria',
-    query: 'Cleopatra VII entering Alexandria harbour on her royal golden barge',
-  },
-  {
-    id: '5',
-    labelEn: 'Dandi March 1930',
-    labelHi: 'दांडी मार्च १९३०',
-    era: '1930 AD • Gujarat',
-    query: 'Mahatma Gandhi leading thousands on the Salt March to Dandi shore in 1930',
-  },
-  {
-    id: '6',
-    labelEn: 'Apollo 11 Landing',
-    labelHi: 'अपोलो ११ लैंडिंग',
-    era: '1969 AD • Tranquility Base',
-    query: 'Neil Armstrong and Buzz Aldrin stepping onto the lunar surface during Apollo 11 mission',
-  },
-];
+import React, { useState } from 'react';
+import { Search, Sparkles, MapPin, Clock, ScrollText, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SearchBarProps {
-  currentLang: 'EN' | 'HI';
   onSearch: (query: string) => void;
   activeQuery: string;
 }
 
-export default function SearchBar({ currentLang, onSearch, activeQuery }: SearchBarProps) {
-  const [inputVal, setInputVal] = useState(activeQuery || '');
+export default function SearchBar({ onSearch, activeQuery }: SearchBarProps) {
+  const { t, currentLang } = useLanguage();
+  const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (activeQuery) {
-      setInputVal(activeQuery);
-      const matchingTag = SAMPLE_TAGS.find(t => t.query === activeQuery);
-      setSelectedTagId(matchingTag ? matchingTag.id : null);
-    }
-  }, [activeQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputVal.trim()) {
-      onSearch(inputVal.trim());
+    if (query.trim()) {
+      onSearch(query);
     }
   };
 
-  const handleSelectTag = (tag: SampleTag) => {
-    setInputVal(tag.query);
-    setSelectedTagId(tag.id);
-    onSearch(tag.query);
-  };
-
-  const handleClear = () => {
-    setInputVal('');
-    setSelectedTagId(null);
-  };
+  const sampleTags = [
+    { 
+      labelEn: 'Coronation of Shivaji Maharaj, 1674',
+      labelLocal: currentLang === 'HI' ? 'शिवाजी महाराज का राज्याभिषेक, 1674' :
+                  currentLang === 'MR' ? 'शिवाजी महाराजांचा राज्याभिषेक, 1674' :
+                  currentLang === 'TE' ? 'శివాజీ మహారాజ్ పట్టాభిషేకం, 1674' :
+                  currentLang === 'GU' ? 'શિવાજી મહારાજનો રાજ્યાભિષેક, 1674' :
+                  currentLang === 'TA' ? 'சிவாஜி மகாராஜா முடிசூட்டு விழா, 1674' :
+                  currentLang === 'BN' ? 'শিবাজী মহারাজের রাজ্যাভিষেক, 1674' : 'Coronation of Shivaji Maharaj, 1674',
+      icon: <Clock className="w-3 h-3" /> 
+    },
+    { 
+      labelEn: 'Battle of Waterloo, 1815',
+      labelLocal: currentLang === 'HI' ? 'वाटरलू का युद्ध, 1815' :
+                  currentLang === 'MR' ? 'वॉटरलूची लढाई, 1815' :
+                  currentLang === 'TE' ? 'వాటర్లూ యుద్ధం, 1815' :
+                  currentLang === 'GU' ? 'વોટરલૂનું યુદ્ધ, 1815' :
+                  currentLang === 'TA' ? 'வாட்டர்லூ போர், 1815' :
+                  currentLang === 'BN' ? 'ওয়াটারলু যুদ্ধ, 1815' : 'Battle of Waterloo, 1815',
+      icon: <MapPin className="w-3 h-3" /> 
+    },
+    { 
+      labelEn: 'Apollo 11 Moon Landing, 1969',
+      labelLocal: currentLang === 'HI' ? 'अपोलो 11 मून लैंडिंग, 1969' :
+                  currentLang === 'MR' ? 'अपोलो 11 चंद्र मोहीम, 1969' :
+                  currentLang === 'TE' ? 'అపోలో 11 మూన్ ల్యాండింగ్, 1969' :
+                  currentLang === 'GU' ? 'અપોલો 11 ચંદ્ર ઉતરાણ, 1969' :
+                  currentLang === 'TA' ? 'அப்பல்லோ 11 நிலவில் தரையிறக்கம், 1969' :
+                  currentLang === 'BN' ? 'অ্যাপোলো ১১ চাঁদ অবতরণ, 1969' : 'Apollo 11 Moon Landing, 1969',
+      icon: <Sparkles className="w-3 h-3" /> 
+    },
+  ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 relative z-20 mb-12">
+    <section id="search-section" className="w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-20 -mt-8 sm:-mt-12 mb-12 sm:mb-20">
       
-      {/* Search Input Container */}
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className={`relative glass-panel rounded-2xl sm:rounded-full p-2 transition-all duration-300 ${
-          isFocused ? 'ring-2 ring-[#D4AF37] shadow-gold-glow-lg border-[#D4AF37]' : 'hover:border-[#D4AF37]/50'
-        }`}
-      >
-        <div className="flex items-center gap-3 px-3 py-1 sm:px-4 sm:py-2">
-          <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-[#D4AF37]' : 'text-[#64748B]'}`} />
+      {/* Main Search Container */}
+      <div className={`relative rounded-2xl sm:rounded-3xl p-1.5 transition-all duration-500 ${
+        isFocused 
+          ? 'bg-gradient-to-r from-[#D4AF37]/40 via-[#242434] to-[#D4AF37]/40 shadow-[0_0_40px_rgba(212,175,55,0.15)] scale-[1.01]' 
+          : 'bg-[#242434] hover:bg-[#2A2A3C] shadow-2xl'
+      }`}>
+        <form 
+          onSubmit={handleSubmit}
+          className="relative flex items-center w-full bg-[#0D0D11] rounded-xl sm:rounded-2xl overflow-hidden"
+        >
+          <div className="pl-4 sm:pl-6 text-[#64748B]">
+            <Search className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${isFocused ? 'text-[#D4AF37]' : ''}`} />
+          </div>
           
           <input
             type="text"
-            value={inputVal}
-            onChange={(e) => {
-              setInputVal(e.target.value);
-              if (selectedTagId) setSelectedTagId(null);
-            }}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder={
-              currentLang === 'EN'
-                ? "Enter any historical event, era, or figure (e.g. Coronation of Shivaji Maharaj)..."
-                : "कोई भी ऐतिहासिक घटना, युग या व्यक्तित्व दर्ज करें (जैसे छत्रपति शिवाजी का राज्याभिषेक)..."
-            }
-            className="w-full bg-transparent text-[#F8FAFC] placeholder-[#64748B] text-sm sm:text-base focus:outline-none py-2 font-sans"
+            placeholder={t('searchPlaceholder')}
+            className="w-full px-3 sm:px-4 py-4 sm:py-5 lg:py-6 bg-transparent text-sm sm:text-base lg:text-lg text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none font-medium"
+            autoComplete="off"
           />
 
-          {inputVal && (
+          {query && (
             <button
               type="button"
-              onClick={handleClear}
-              className="p-1 rounded-full text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#242434] transition-colors"
-              title="Clear input"
+              onClick={() => setQuery('')}
+              className="p-2 text-[#64748B] hover:text-[#F8FAFC] transition-colors"
+              aria-label="Clear query"
             >
-              <X className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
 
-          {/* Action CTA Button */}
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            type="submit"
-            className="flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-full bg-gradient-to-r from-[#D4AF37] to-[#B89220] text-[#0D0D11] font-bold text-xs sm:text-sm tracking-wide shadow-gold-glow hover:shadow-gold-glow-lg transition-all shrink-0"
-          >
-            <Sparkles className="w-4 h-4 text-[#0D0D11]" />
-            <span>{currentLang === 'EN' ? 'Witness Event' : 'दृश्य बनाएं'}</span>
-            <ArrowRight className="w-4 h-4 text-[#0D0D11] hidden sm:block" />
-          </motion.button>
-        </div>
-      </motion.form>
-
-      {/* Interactive Sample Tag Pills Header */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="mt-6 flex items-center justify-between px-1"
-      >
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#D4AF37] tracking-wider uppercase">
-          <History className="w-3.5 h-3.5" />
-          <span>{currentLang === 'EN' ? 'Popular Historical Coordinates' : 'लोकप्रिय ऐतिहासिक घटनाएँ'}</span>
-        </div>
-        <span className="text-[11px] text-[#64748B] hidden sm:inline">
-          {currentLang === 'EN' ? 'Click any pill to generate scene' : 'दृश्य बनाने के लिए किसी टैग पर क्लिक करें'}
-        </span>
-      </motion.div>
-
-      {/* Sample Tag Pills List */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        className="mt-3 flex flex-wrap gap-2 sm:gap-2.5"
-      >
-        {SAMPLE_TAGS.map((tag) => {
-          const isSelected = selectedTagId === tag.id || activeQuery === tag.query;
-          const label = currentLang === 'EN' ? tag.labelEn : tag.labelHi;
-
-          return (
-            <motion.button
-              key={tag.id}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => handleSelectTag(tag)}
-              className={`group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 border ${
-                isSelected
-                  ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#14141C] border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
-                  : 'bg-[#14141C]/80 border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/50 hover:text-[#F8FAFC] hover:bg-[#1B1B26]'
-              }`}
+          <div className="pr-2 sm:pr-3">
+            <button
+              type="submit"
+              disabled={!query.trim()}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B89220] hover:from-[#FFF3C4] hover:to-[#D4AF37] text-[#0A0A0E] font-bold text-xs sm:text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <Compass className={`w-3.5 h-3.5 transition-colors ${isSelected ? 'text-[#D4AF37]' : 'text-[#64748B] group-hover:text-[#D4AF37]'}`} />
-              <span>{label}</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#0D0D11]/60 text-[#64748B] group-hover:text-[#94A3B8] border border-[#242434]">
-                {tag.era.split('•')[0].trim()}
-              </span>
-            </motion.button>
-          );
-        })}
-      </motion.div>
+              <span className="hidden xs:inline">{t('searchButton')}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      </div>
 
-    </div>
+      {/* Suggested Pills */}
+      <div className="mt-6 sm:mt-8">
+        <div className="flex flex-col items-center justify-center gap-2 mb-4">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#64748B] flex items-center gap-2">
+            <ScrollText className="w-3.5 h-3.5 text-[#D4AF37]" />
+            {t('popularCoordinates')}
+          </span>
+          <span className="text-[10px] text-[#475569]">{t('clickPill')}</span>
+        </div>
+        
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          {sampleTags.map((tag, idx) => {
+            const label = tag.labelLocal;
+            const isActive = activeQuery === tag.labelEn;
+            
+            return (
+              <button
+                key={idx}
+                onClick={() => onSearch(tag.labelEn)} // Always pass English query to backend for consistency unless requested otherwise
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                  isActive 
+                    ? 'bg-[#D4AF37] text-[#0A0A0E] shadow-gold-glow' 
+                    : 'bg-[#14141C] border border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/50 hover:text-[#D4AF37] hover:bg-[#1B1B26]'
+                }`}
+              >
+                {tag.icon}
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }

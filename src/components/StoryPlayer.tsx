@@ -5,8 +5,11 @@ import { motion } from 'framer-motion';
 import { HistoricalScene } from '@/types/story';
 import { Film, RefreshCw, MessageCircle, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
+import { LanguageCode } from '@/lib/translations';
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface StoryPlayerProps {
-  currentLang: 'EN' | 'HI';
+  currentLang?: LanguageCode | string;
   searchQuery: string;
   scenes: HistoricalScene[]; // Use proper type for scenes
   isLoading: boolean;
@@ -20,6 +23,8 @@ export default function StoryPlayer({
   isLoading, 
   onOpenTalkToHistory 
 }: StoryPlayerProps) {
+  const { currentLang: ctxLang, t } = useLanguage();
+  const effectiveLang = (currentLang || ctxLang || 'EN') as LanguageCode;
   const [activeIdx, setActiveIdx] = useState(0);
   const [playingAudio, setPlayingAudio] = useState(false);
 
@@ -45,7 +50,16 @@ export default function StoryPlayer({
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(currentScene.narration);
-      utterance.lang = currentLang === 'HI' ? 'hi-IN' : 'en-US';
+      const localeMap: Record<string, string> = {
+        EN: 'en-US',
+        HI: 'hi-IN',
+        MR: 'mr-IN',
+        TE: 'te-IN',
+        GU: 'gu-IN',
+        TA: 'ta-IN',
+        BN: 'bn-IN',
+      };
+      utterance.lang = localeMap[String(effectiveLang)] || 'en-US';
       utterance.rate = 0.95;
       utterance.onend = () => setPlayingAudio(false);
       utterance.onerror = () => setPlayingAudio(false);
@@ -57,7 +71,7 @@ export default function StoryPlayer({
         window.speechSynthesis.cancel();
       }
     };
-  }, [playingAudio, currentScene, currentLang]);
+  }, [playingAudio, currentScene, effectiveLang]);
 
   const handlePrev = () => {
     setPlayingAudio(false);
@@ -76,7 +90,7 @@ export default function StoryPlayer({
         <motion.div className="py-12 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Film className="w-12 h-12 mx-auto text-[#D4AF37]" />
           <h3 className="mt-4 text-xl font-cinzel text-[#F8FAFC]">
-            {currentLang === 'EN' ? 'Awaiting Historical Coordinates' : 'ऐतिहासिक निर्देशांक प्रतीक्षारत'}
+            {t('awaitingCoordinates')}
           </h3>
         </motion.div>
       )}
@@ -86,7 +100,7 @@ export default function StoryPlayer({
         <motion.div className="py-16 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <RefreshCw className="w-12 h-12 mx-auto text-[#D4AF37] animate-spin" />
           <h3 className="mt-4 text-lg text-[#FFF3C4]">
-            {currentLang === 'EN' ? 'Generating story...' : 'कहानी बन रही है...'}
+            {t('reconstructing')}
           </h3>
         </motion.div>
       )}
@@ -96,7 +110,7 @@ export default function StoryPlayer({
         <div className="bg-[#14141C] p-6 rounded-2xl border border-[#D4AF37]/30 text-[#F8FAFC] shadow-2xl">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-mono text-[#D4AF37] tracking-wider uppercase">
-              {currentScene.era || `Scene ${currentScene.sceneNumber || activeIdx + 1} of ${scenes.length}`}
+              {currentScene.era || `${t('scene')} ${currentScene.sceneNumber || activeIdx + 1} of ${scenes.length}`}
             </span>
             <span className="text-xs text-[#94A3B8]">
               {activeIdx + 1} / {scenes.length}
@@ -118,7 +132,7 @@ export default function StoryPlayer({
                 title={playingAudio ? 'Pause Narration' : 'Play Narration'}
               >
                 {playingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                <span>{playingAudio ? (currentLang === 'EN' ? 'Pause' : 'विराम') : (currentLang === 'EN' ? 'Listen' : 'सुनें')}</span>
+                <span>{playingAudio ? (effectiveLang === 'EN' ? 'Pause' : 'विराम') : (effectiveLang === 'EN' ? 'Listen' : 'सुनें')}</span>
               </button>
 
               <button 
@@ -127,7 +141,7 @@ export default function StoryPlayer({
                 title="Talk to History"
               >
                 <MessageCircle className="w-4 h-4 text-[#D4AF37]" />
-                <span className="hidden sm:inline">{currentLang === 'EN' ? 'Talk to Figure' : 'संवाद करें'}</span>
+                <span className="hidden sm:inline">{t('talkToWitness')}</span>
               </button>
             </div>
 
