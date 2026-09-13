@@ -9,8 +9,8 @@ import ScenePlaceholder from '@/components/ScenePlaceholder';
 import { useToast } from '@/components/ToastProvider';
 import { useApp } from '@/context/AppContext';
 import { HistoricalScene, HistoricalKnowledgeContext } from '@/types/story';
-import { 
-  Hourglass, 
+import {
+  Hourglass,
   ArrowUpRight,
   Landmark,
   Crown,
@@ -27,13 +27,13 @@ import {
 
 export default function HomePage() {
   const toast = useToast();
-  const { 
-    currentLang, 
-    isMuted, 
-    toggleMute, 
-    openTalkModal, 
-    addRecentSearch, 
-    addToHistoryLog 
+  const {
+    currentLang,
+    isMuted,
+    toggleMute,
+    openTalkModal,
+    addRecentSearch,
+    addToHistoryLog
   } = useApp();
 
   const [activeQuery, setActiveQuery] = useState('');
@@ -61,7 +61,7 @@ export default function HomePage() {
     } catch {
       // Silently ignore URL parse errors
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = async (query: string) => {
@@ -141,7 +141,7 @@ export default function HomePage() {
 
   return (
     <main className="relative" id="hero">
-      
+
       {/* Hero Section */}
       <HeroSection currentLang={currentLang} />
 
@@ -186,7 +186,7 @@ export default function HomePage() {
 
         {/* 2 Column Dual Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          
+
           {/* Column 1: Indian History */}
           <div className="p-6 sm:p-8 rounded-3xl bg-[#14141C] border border-[#D4AF37]/30 relative overflow-hidden flex flex-col justify-between shadow-2xl">
             <div>

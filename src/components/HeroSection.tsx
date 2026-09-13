@@ -45,7 +45,7 @@ export default function HeroSection({ currentLang }: HeroSectionProps) {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#D4AF37]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        
+
         {/* Top Feature Tag */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

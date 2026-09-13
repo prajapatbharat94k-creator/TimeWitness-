@@ -4,40 +4,40 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Compass, 
-  Search, 
-  ArrowUpRight, 
-  Bookmark, 
-  BookmarkCheck, 
-  Sparkles, 
-  Landmark, 
-  Clock, 
-  Globe, 
-  Shield, 
-  Crown, 
-  Swords, 
+import {
+  Compass,
+  Search,
+  ArrowUpRight,
+  Bookmark,
+  BookmarkCheck,
+  Sparkles,
+  Landmark,
+  Clock,
+  Globe,
+  Shield,
+  Crown,
+  Swords,
   ScrollText,
   Filter,
   Flame,
   CheckCircle2
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { 
-  REGIONS, 
-  EPOCHS, 
-  RegionCategory, 
-  EpochEra, 
-  INDIAN_CATEGORIES, 
-  WORLD_CATEGORIES, 
-  FEATURED_EXPERIENCES, 
+import {
+  REGIONS,
+  EPOCHS,
+  RegionCategory,
+  EpochEra,
+  INDIAN_CATEGORIES,
+  WORLD_CATEGORIES,
+  FEATURED_EXPERIENCES,
   HistoricalFigureOrEvent,
   HistoricalCategory
 } from '@/data/historicalCatalog';
 
 export default function ExplorePage() {
   const { currentLang, isJourneySaved, toggleSaveJourney } = useApp();
-  
+
   const [selectedRegion, setSelectedRegion] = useState<RegionCategory>('ALL HISTORY');
   const [selectedEpoch, setSelectedEpoch] = useState<EpochEra>('All Eras');
   const [filterQuery, setFilterQuery] = useState('');
@@ -48,8 +48,8 @@ export default function ExplorePage() {
     return INDIAN_CATEGORIES.filter(cat => {
       const matchesRegion = selectedRegion === 'ALL HISTORY' || selectedRegion === 'INDIA' || (selectedRegion === 'ANCIENT WORLD' && cat.epoch === 'Ancient') || (selectedRegion === 'MODERN WORLD' && (cat.epoch === 'Modern' || cat.epoch === 'Contemporary'));
       const matchesEpoch = selectedEpoch === 'All Eras' || cat.epoch === selectedEpoch;
-      const matchesQuery = !filterQuery || 
-        cat.name.toLowerCase().includes(filterQuery.toLowerCase()) || 
+      const matchesQuery = !filterQuery ||
+        cat.name.toLowerCase().includes(filterQuery.toLowerCase()) ||
         cat.description.toLowerCase().includes(filterQuery.toLowerCase()) ||
         cat.sampleQuery.toLowerCase().includes(filterQuery.toLowerCase());
       return matchesRegion && matchesEpoch && matchesQuery;
@@ -58,13 +58,13 @@ export default function ExplorePage() {
 
   const filteredWorldCats = useMemo(() => {
     return WORLD_CATEGORIES.filter(cat => {
-      const matchesRegion = selectedRegion === 'ALL HISTORY' || 
-        cat.region === selectedRegion || 
-        (selectedRegion === 'ANCIENT WORLD' && cat.epoch === 'Ancient') || 
+      const matchesRegion = selectedRegion === 'ALL HISTORY' ||
+        cat.region === selectedRegion ||
+        (selectedRegion === 'ANCIENT WORLD' && cat.epoch === 'Ancient') ||
         (selectedRegion === 'MODERN WORLD' && (cat.epoch === 'Modern' || cat.epoch === 'Contemporary'));
       const matchesEpoch = selectedEpoch === 'All Eras' || cat.epoch === selectedEpoch;
-      const matchesQuery = !filterQuery || 
-        cat.name.toLowerCase().includes(filterQuery.toLowerCase()) || 
+      const matchesQuery = !filterQuery ||
+        cat.name.toLowerCase().includes(filterQuery.toLowerCase()) ||
         cat.description.toLowerCase().includes(filterQuery.toLowerCase()) ||
         cat.sampleQuery.toLowerCase().includes(filterQuery.toLowerCase());
       return matchesRegion && matchesEpoch && matchesQuery;
@@ -74,17 +74,17 @@ export default function ExplorePage() {
   // Filter experiences
   const filteredExperiences = useMemo(() => {
     return FEATURED_EXPERIENCES.filter(exp => {
-      const matchesRegion = selectedRegion === 'ALL HISTORY' || 
+      const matchesRegion = selectedRegion === 'ALL HISTORY' ||
         exp.region === selectedRegion ||
         (selectedRegion === 'ANCIENT WORLD' && exp.epoch === 'Ancient') ||
         (selectedRegion === 'MODERN WORLD' && (exp.epoch === 'Modern' || exp.epoch === 'Contemporary'));
       const matchesEpoch = selectedEpoch === 'All Eras' || exp.epoch === selectedEpoch;
-      const matchesQuery = !filterQuery || 
-        exp.title.toLowerCase().includes(filterQuery.toLowerCase()) || 
+      const matchesQuery = !filterQuery ||
+        exp.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
         exp.description.toLowerCase().includes(filterQuery.toLowerCase()) ||
         exp.tags.some(t => t.toLowerCase().includes(filterQuery.toLowerCase()));
-      const matchesTab = activeTab === 'all' || 
-        (activeTab === 'india' && exp.isIndianHistory) || 
+      const matchesTab = activeTab === 'all' ||
+        (activeTab === 'india' && exp.isIndianHistory) ||
         (activeTab === 'world' && !exp.isIndianHistory);
       return matchesRegion && matchesEpoch && matchesQuery && matchesTab;
     });
@@ -92,12 +92,12 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen pb-24">
-      
+
       {/* Hero Header */}
       <section className="relative py-16 sm:py-24 border-b border-[#242434] bg-radial-gradient overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-10 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono uppercase tracking-widest mb-4">
             <Compass className="w-3.5 h-3.5" />
             <span>{currentLang === 'EN' ? 'Global Archival Portal' : 'वैश्विक ऐतिहासिक अभिलेखागार'}</span>
@@ -138,7 +138,7 @@ export default function ExplorePage() {
       {/* Navigation Filter Controls */}
       <section className="sticky top-16 sm:top-20 z-30 bg-[#0D0D11]/95 backdrop-blur-xl border-b border-[#242434] py-3.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
-          
+
           {/* Region Filter Bar */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
             <span className="text-[#64748B] font-mono shrink-0 hidden sm:inline mr-1 uppercase text-[10px]">
@@ -148,11 +148,10 @@ export default function ExplorePage() {
               <button
                 key={region}
                 onClick={() => setSelectedRegion(region)}
-                className={`px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition-all ${
-                  selectedRegion === region
+                className={`px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition-all ${selectedRegion === region
                     ? 'bg-[#D4AF37] text-black font-semibold shadow-gold-glow'
                     : 'bg-[#14141C] text-[#94A3B8] border border-[#242434] hover:border-[#D4AF37]/50 hover:text-white'
-                }`}
+                  }`}
               >
                 {region}
               </button>
@@ -169,11 +168,10 @@ export default function ExplorePage() {
                 <button
                   key={epoch}
                   onClick={() => setSelectedEpoch(epoch)}
-                  className={`px-2.5 py-1 rounded-lg whitespace-nowrap text-xs transition-all ${
-                    selectedEpoch === epoch
+                  className={`px-2.5 py-1 rounded-lg whitespace-nowrap text-xs transition-all ${selectedEpoch === epoch
                       ? 'bg-[#FFF3C4] text-black font-bold'
                       : 'bg-[#1A1A24] text-[#94A3B8] hover:text-white'
-                  }`}
+                    }`}
                 >
                   {epoch}
                 </button>
@@ -209,7 +207,7 @@ export default function ExplorePage() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-16">
-        
+
         {/* ─── SECTION 1: FEATURED EXPERIENCES (CINEMATIC CARDS) ────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-6">
@@ -264,14 +262,13 @@ export default function ExplorePage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#14141C] via-[#14141C]/40 to-transparent" />
-                      
+
                       {/* Top Badges */}
                       <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          item.isIndianHistory 
-                            ? 'bg-[#D4AF37]/20 border border-[#D4AF37]/50 text-[#FFF3C4]' 
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.isIndianHistory
+                            ? 'bg-[#D4AF37]/20 border border-[#D4AF37]/50 text-[#FFF3C4]'
                             : 'bg-[#38BDF8]/20 border border-[#38BDF8]/50 text-[#E0F2FE]'
-                        }`}>
+                          }`}>
                           {item.region}
                         </span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-black/60 text-[#CBD5E1] backdrop-blur-md">
@@ -331,7 +328,7 @@ export default function ExplorePage() {
                           <span>{currentLang === 'EN' ? 'Witness Story' : 'साक्षी बनें'}</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </Link>
-                        
+
                         <Link
                           href={`/experience/${item.id}`}
                           className="py-2 px-3 rounded-xl bg-[#1B1B26] border border-[#242434] hover:border-[#D4AF37]/40 text-xs text-[#CBD5E1] hover:text-white transition-all font-medium"

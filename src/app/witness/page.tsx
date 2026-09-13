@@ -3,14 +3,14 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  ScrollText, 
-  Search, 
-  Sparkles, 
-  RefreshCw, 
-  Compass, 
-  Volume2, 
-  VolumeX, 
+import {
+  ScrollText,
+  Search,
+  Sparkles,
+  RefreshCw,
+  Compass,
+  Volume2,
+  VolumeX,
   MessageSquare,
   ArrowRight
 } from 'lucide-react';
@@ -55,7 +55,7 @@ function WitnessContent() {
       setInputQuery('Coronation of Chhatrapati Shivaji Maharaj');
       triggerStoryGeneration(defaultTopic);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const triggerStoryGeneration = async (topic: string) => {
@@ -126,11 +126,11 @@ function WitnessContent() {
 
   return (
     <div className="min-h-screen pb-24">
-      
+
       {/* Witness Header & Search Bar */}
       <section className="relative py-12 sm:py-16 border-b border-[#242434] bg-[#0A0A0E]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono uppercase tracking-widest mb-3">
             <ScrollText className="w-3.5 h-3.5" />
             <span>{currentLang === 'EN' ? 'Historical Witnessing Chamber' : 'ऐतिहासिक साक्षी कक्ष'}</span>
@@ -185,11 +185,10 @@ function WitnessContent() {
                   setInputQuery(suggestion);
                   triggerStoryGeneration(suggestion);
                 }}
-                className={`text-xs px-3 py-1 rounded-full border transition-all ${
-                  activeQuery.toLowerCase().includes(suggestion.slice(0, 15).toLowerCase())
+                className={`text-xs px-3 py-1 rounded-full border transition-all ${activeQuery.toLowerCase().includes(suggestion.slice(0, 15).toLowerCase())
                     ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#FFF3C4]'
                     : 'bg-[#14141C] border-[#242434] text-[#94A3B8] hover:text-white hover:border-[#D4AF37]/40'
-                }`}
+                  }`}
               >
                 {suggestion}
               </button>

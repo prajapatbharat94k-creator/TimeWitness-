@@ -27,13 +27,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #0D0D11;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #242434;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #D4AF37;
 }
@@ -63,6 +66,7 @@ body {
 .gold-border-glow {
   position: relative;
 }
+
 .gold-border-glow::before {
   content: '';
   position: absolute;
@@ -94,6 +98,7 @@ body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
@@ -104,6 +109,7 @@ body {
     opacity: 0;
     transform: translateX(60px) scale(0.92);
   }
+
   to {
     opacity: 1;
     transform: translateX(0) scale(1);

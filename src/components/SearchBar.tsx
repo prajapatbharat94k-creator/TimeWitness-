@@ -97,20 +97,19 @@ export default function SearchBar({ currentLang, onSearch, activeQuery }: Search
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative z-20 mb-12">
-      
+
       {/* Search Input Container */}
       <motion.form
         onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className={`relative glass-panel rounded-2xl sm:rounded-full p-2 transition-all duration-300 ${
-          isFocused ? 'ring-2 ring-[#D4AF37] shadow-gold-glow-lg border-[#D4AF37]' : 'hover:border-[#D4AF37]/50'
-        }`}
+        className={`relative glass-panel rounded-2xl sm:rounded-full p-2 transition-all duration-300 ${isFocused ? 'ring-2 ring-[#D4AF37] shadow-gold-glow-lg border-[#D4AF37]' : 'hover:border-[#D4AF37]/50'
+          }`}
       >
         <div className="flex items-center gap-3 px-3 py-1 sm:px-4 sm:py-2">
           <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-[#D4AF37]' : 'text-[#64748B]'}`} />
-          
+
           <input
             type="text"
             value={inputVal}
@@ -186,11 +185,10 @@ export default function SearchBar({ currentLang, onSearch, activeQuery }: Search
               whileHover={{ scale: 1.04, y: -2 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => handleSelectTag(tag)}
-              className={`group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 border ${
-                isSelected
+              className={`group flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 border ${isSelected
                   ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#14141C] border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
                   : 'bg-[#14141C]/80 border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/50 hover:text-[#F8FAFC] hover:bg-[#1B1B26]'
-              }`}
+                }`}
             >
               <Compass className={`w-3.5 h-3.5 transition-colors ${isSelected ? 'text-[#D4AF37]' : 'text-[#64748B] group-hover:text-[#D4AF37]'}`} />
               <span>{label}</span>

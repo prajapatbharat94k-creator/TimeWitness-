@@ -3,21 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Film, 
-  Volume2, 
-  VolumeX, 
-  Play, 
-  Pause, 
-  Sparkles, 
-  Clock, 
-  MessageCircle, 
-  RefreshCw, 
-  Eye, 
-  ChevronLeft, 
-  ChevronRight, 
-  Radio, 
-  Wand2, 
+import {
+  Film,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Sparkles,
+  Clock,
+  MessageCircle,
+  RefreshCw,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Radio,
+  Wand2,
   Beaker,
   BookOpen,
   ExternalLink
@@ -49,11 +49,11 @@ const DEFAULT_IMAGES = [
   'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
 ];
 
-export default function ScenePlaceholder({ 
-  currentLang, 
-  searchQuery, 
-  scenes, 
-  isLoading, 
+export default function ScenePlaceholder({
+  currentLang,
+  searchQuery,
+  scenes,
+  isLoading,
   onOpenTalkToHistory,
   source,
   wikiContext,
@@ -100,7 +100,7 @@ export default function ScenePlaceholder({
 
   return (
     <section id="scene-viewer" className="w-full max-w-6xl mx-auto px-4 pb-20 relative z-10">
-      
+
       {/* Ambient Audio (invisible, purely functional) */}
       {currentScene && (
         <AmbientAudioPlayer
@@ -113,7 +113,7 @@ export default function ScenePlaceholder({
       {/* Outer Golden Border Frame */}
       <div className="relative rounded-3xl p-px bg-gradient-to-b from-[#D4AF37]/40 via-[#242434] to-[#14141C] shadow-2xl">
         <div className="rounded-[23px] bg-[#0D0D11] p-4 sm:p-6 md:p-8 min-h-[500px] flex flex-col justify-between relative overflow-hidden">
-          
+
           {/* Subtle Ambient Grid in background */}
           <div className="absolute inset-0 bg-[radial-gradient(#242434_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
 
@@ -174,7 +174,7 @@ export default function ScenePlaceholder({
 
             {/* STATE 1: IDLE / EMPTY PLACEHOLDER STATE */}
             {!isLoading && scenes.length === 0 && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="py-12 px-4 text-center flex flex-col items-center justify-center max-w-2xl mx-auto"
@@ -187,9 +187,9 @@ export default function ScenePlaceholder({
                 <h3 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#F8FAFC] mb-3">
                   {currentLang === 'EN' ? 'Awaiting Historical Coordinates' : 'ऐतिहासिक निर्देशांक प्रतीक्षारत'}
                 </h3>
-                
+
                 <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed mb-8">
-                  {currentLang === 'EN' 
+                  {currentLang === 'EN'
                     ? 'Enter any topic or select a sample pill above to generate a 5-scene AI historical narrative powered by Gemini.'
                     : 'ऊपर दिए गए टैग पर क्लिक करें या जेमिनी द्वारा 5-दृश्य कथा बनाने के लिए कोई भी विषय खोजें।'}
                 </p>
@@ -217,7 +217,7 @@ export default function ScenePlaceholder({
 
             {/* STATE 2: LOADING CINEMATIC GENERATION ANIMATION */}
             {isLoading && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="py-16 px-4 text-center flex flex-col items-center justify-center max-w-xl mx-auto"
@@ -230,13 +230,13 @@ export default function ScenePlaceholder({
                 <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-[#FFF3C4] mb-2">
                   {currentLang === 'EN' ? 'Gemini AI Generating 5-Scene Journey...' : 'जेमिनी AI 5-दृश्य यात्रा तैयार कर रहा है...'}
                 </h3>
-                
+
                 <p className="text-xs sm:text-sm text-[#D4AF37] font-mono mb-6 animate-pulse">
                   Synthesizing Origin, Rise, Climax, Victory &amp; Legacy...
                 </p>
 
                 <div className="w-full h-2 rounded-full bg-[#1B1B26] border border-[#242434] overflow-hidden mb-3">
-                  <motion.div 
+                  <motion.div
                     className="h-full bg-gradient-to-r from-[#B89220] via-[#D4AF37] to-[#FFF3C4] animate-shimmer"
                     style={{ width: '85%' }}
                   />
@@ -247,13 +247,13 @@ export default function ScenePlaceholder({
 
             {/* STATE 3: 5-SCENE INTERACTIVE JOURNEY VIEW */}
             {!isLoading && scenes.length > 0 && currentScene && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
                 className="space-y-6"
               >
-                
+
                 {/* 5-Scene Navigation Stepper Tabs — horizontal scroll on mobile */}
                 <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-2 border-b border-[#242434] scrollbar-none snap-x snap-mandatory">
                   {scenes.map((sc, idx) => {
@@ -265,11 +265,10 @@ export default function ScenePlaceholder({
                           setActiveSceneIdx(idx);
                           setIsPlayingAudio(false);
                         }}
-                        className={`flex-none sm:flex-1 min-w-[100px] sm:min-w-[110px] snap-start p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
-                          isActive
+                        className={`flex-none sm:flex-1 min-w-[100px] sm:min-w-[110px] snap-start p-2 sm:p-2.5 rounded-xl border text-left transition-all ${isActive
                             ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#14141C] border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
                             : 'bg-[#14141C]/60 border-[#242434] text-[#94A3B8] hover:bg-[#1B1B26] hover:text-[#F8FAFC]'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between text-[10px] font-mono uppercase text-[#D4AF37] mb-0.5">
                           <span>Scene {sc.sceneNumber}</span>
@@ -291,7 +290,7 @@ export default function ScenePlaceholder({
                     transition={{ duration: 0.25 }}
                     className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
                   >
-                    
+
                     {/* Left Column: Visual Artwork Frame */}
                     <div className="lg:col-span-6 relative group rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl aspect-video bg-[#14141C]">
                       <Image
@@ -335,11 +334,10 @@ export default function ScenePlaceholder({
                         <button
                           onClick={onToggleMute}
                           aria-label={isMuted ? 'Unmute' : 'Mute'}
-                          className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-                            isMuted
+                          className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 transition-all ${isMuted
                               ? 'border-[#242434] text-[#4A5568] hover:text-[#94A3B8]'
                               : 'border-[#D4AF37]/40 text-[#D4AF37] hover:border-[#D4AF37]'
-                          }`}
+                            }`}
                         >
                           {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                         </button>
@@ -348,7 +346,7 @@ export default function ScenePlaceholder({
 
                     {/* Right Column: Narration & Scene Details */}
                     <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-4">
-                      
+
                       <div>
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[10px] font-extrabold text-[#D4AF37]">
@@ -386,11 +384,10 @@ export default function ScenePlaceholder({
                             setIsPlayingAudio(false);
                           }}
                           disabled={activeSceneIdx === 0}
-                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                            activeSceneIdx === 0
+                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${activeSceneIdx === 0
                               ? 'opacity-40 border-[#242434] text-[#64748B] cursor-not-allowed'
                               : 'border-[#242434] hover:border-[#D4AF37] text-[#94A3B8] hover:text-[#F8FAFC] bg-[#14141C]'
-                          }`}
+                            }`}
                         >
                           <ChevronLeft className="w-4 h-4" />
                           <span className="hidden sm:inline">Previous Scene</span>
@@ -412,11 +409,10 @@ export default function ScenePlaceholder({
                             setIsPlayingAudio(false);
                           }}
                           disabled={activeSceneIdx === scenes.length - 1}
-                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                            activeSceneIdx === scenes.length - 1
+                          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border text-xs font-bold transition-all ${activeSceneIdx === scenes.length - 1
                               ? 'opacity-40 border-[#242434] text-[#64748B] cursor-not-allowed'
                               : 'border-[#242434] hover:border-[#D4AF37] text-[#94A3B8] hover:text-[#F8FAFC] bg-[#14141C]'
-                          }`}
+                            }`}
                         >
                           <span className="hidden sm:inline">Next Scene</span>
                           <span className="sm:hidden">Next</span>
@@ -454,8 +450,8 @@ export default function ScenePlaceholder({
                   {isDemoMode
                     ? 'Demo Mode · Curated Sample Story'
                     : isFallback
-                    ? 'Fallback Mode · Offline Story'
-                    : 'Gemini API Strict JSON Pipeline Active'}
+                      ? 'Fallback Mode · Offline Story'
+                      : 'Gemini API Strict JSON Pipeline Active'}
                 </span>
               </span>
             </div>

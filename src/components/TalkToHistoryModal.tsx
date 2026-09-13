@@ -355,11 +355,10 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                             text: currentLang === 'EN' ? fig.greetingEn : fig.greetingHi,
                           }]);
                         }}
-                        className={`w-full text-left p-2.5 rounded-2xl flex items-center gap-3 transition-all ${
-                          isSelected
+                        className={`w-full text-left p-2.5 rounded-2xl flex items-center gap-3 transition-all ${isSelected
                             ? 'bg-gradient-to-r from-[#D4AF37]/30 to-[#1B1B26] border border-[#D4AF37] text-[#FFF3C4] shadow-gold-glow'
                             : 'bg-[#0D0D11]/60 border border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/40 hover:text-[#F8FAFC]'
-                        }`}
+                          }`}
                       >
                         <Image
                           src={fig.avatar}
@@ -387,7 +386,7 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
 
             {/* Right Column: Interactive Chat Interface */}
             <div className="flex-1 flex flex-col justify-between bg-[#0D0D11] p-4 sm:p-6 relative overflow-hidden">
-              
+
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-[#242434]">
                 <div className="flex items-center gap-3">
@@ -428,11 +427,10 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                     className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] sm:max-w-[75%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                        msg.sender === 'user'
+                      className={`max-w-[85%] sm:max-w-[75%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${msg.sender === 'user'
                           ? 'bg-[#D4AF37] text-[#0D0D11] font-semibold rounded-tr-none shadow-gold-glow'
                           : 'glass-panel text-[#F8FAFC] rounded-tl-none border border-[#D4AF37]/30'
-                      }`}
+                        }`}
                     >
                       {msg.sender === 'figure' && (
                         <div className="flex items-center gap-1.5 text-[10px] text-[#D4AF37] font-mono mb-1">
@@ -466,11 +464,10 @@ export default function TalkToHistoryModal({ isOpen, onClose, currentLang, defau
                 <div className="flex items-center gap-2 bg-[#14141C] p-2 rounded-2xl border border-[#242434] focus-within:border-[#D4AF37] transition-all">
                   <button
                     onClick={toggleRecording}
-                    className={`p-2 rounded-xl transition-colors ${
-                      isRecording 
-                        ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse' 
+                    className={`p-2 rounded-xl transition-colors ${isRecording
+                        ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
                         : 'text-[#64748B] hover:text-[#D4AF37]'
-                    }`}
+                      }`}
                     title={isRecording ? 'Listening... click to stop' : 'Voice Input (Click to speak)'}
                   >
                     <Mic className="w-5 h-5" />

@@ -3,20 +3,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Hourglass, 
-  Globe, 
-  Search, 
-  Volume2, 
-  VolumeX, 
-  User, 
-  Sparkles, 
-  Menu, 
-  X, 
-  ChevronDown, 
-  Compass, 
-  ScrollText, 
-  BookOpen, 
+import {
+  Hourglass,
+  Globe,
+  Search,
+  Volume2,
+  VolumeX,
+  User,
+  Sparkles,
+  Menu,
+  X,
+  ChevronDown,
+  Compass,
+  ScrollText,
+  BookOpen,
   Info,
   Layers
 } from 'lucide-react';
@@ -26,7 +26,7 @@ import { useApp } from '@/context/AppContext';
 export default function Navbar() {
   const pathname = usePathname();
   const { currentLang, setLanguage, isMuted, toggleMute, openTalkModal } = useApp();
-  
+
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
@@ -61,10 +61,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#0D0D11]/90 border-b border-[#242434] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
-        
+
         {/* Brand Logo */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none shrink-0"
           aria-label="TimeWitness Home"
         >
@@ -91,11 +91,10 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 py-1 px-2 rounded-lg transition-all duration-200 ${
-                  isActive
+                className={`flex items-center gap-2 py-1 px-2 rounded-lg transition-all duration-200 ${isActive
                     ? 'text-[#FFF3C4] border-b-2 border-[#D4AF37] font-semibold'
                     : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1A1A26]/50'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-[#64748B]'}`} />
                 <span>{currentLang === 'EN' ? item.labelEn : item.labelHi}</span>
@@ -106,7 +105,7 @@ export default function Navbar() {
 
         {/* Right Side Controls: Search | Language | Audio | Dashboard | Profile | CTA */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
-          
+
           {/* Search Trigger */}
           <Link
             href="/search"
@@ -144,11 +143,10 @@ export default function Navbar() {
                       setLanguage('EN');
                       setIsLangOpen(false);
                     }}
-                    className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition-colors ${
-                      currentLang === 'EN'
+                    className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition-colors ${currentLang === 'EN'
                         ? 'bg-[#D4AF37]/15 text-[#FFF3C4] font-bold'
                         : 'text-[#94A3B8] hover:bg-[#1E1E2D] hover:text-[#F8FAFC]'
-                    }`}
+                      }`}
                   >
                     <span>English</span>
                     {currentLang === 'EN' && <span className="text-[#D4AF37] text-[10px]">✓</span>}
@@ -158,11 +156,10 @@ export default function Navbar() {
                       setLanguage('HI');
                       setIsLangOpen(false);
                     }}
-                    className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition-colors ${
-                      currentLang === 'HI'
+                    className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition-colors ${currentLang === 'HI'
                         ? 'bg-[#D4AF37]/15 text-[#FFF3C4] font-bold'
                         : 'text-[#94A3B8] hover:bg-[#1E1E2D] hover:text-[#F8FAFC]'
-                    }`}
+                      }`}
                   >
                     <span>हिन्दी</span>
                     {currentLang === 'HI' && <span className="text-[#D4AF37] text-[10px]">✓</span>}
@@ -177,11 +174,10 @@ export default function Navbar() {
             onClick={toggleMute}
             aria-label={isMuted ? 'Unmute Ambient Sound' : 'Mute Ambient Sound'}
             title={isMuted ? (currentLang === 'EN' ? 'Unmute Ambience' : 'ध्वनि चालू करें') : (currentLang === 'EN' ? 'Mute Ambience' : 'ध्वनि बंद करें')}
-            className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${
-              isMuted
+            className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${isMuted
                 ? 'bg-[#14141C] border-[#242434] text-[#64748B] hover:text-[#94A3B8] hover:border-[#D4AF37]/30'
                 : 'bg-[#D4AF37]/10 border-[#D4AF37]/40 text-[#D4AF37] hover:border-[#D4AF37] shadow-gold-glow'
-            }`}
+              }`}
           >
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 animate-pulse-slow" />}
           </button>
@@ -191,11 +187,10 @@ export default function Navbar() {
             href="/dashboard"
             aria-label="Chronicler Dashboard"
             title={currentLang === 'EN' ? 'Chronicler Dashboard' : 'डैशबोर्ड'}
-            className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${
-              pathname === '/dashboard'
+            className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${pathname === '/dashboard'
                 ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-[#FFF3C4]'
                 : 'bg-[#14141C] border-[#242434] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#D4AF37]/40'
-            }`}
+              }`}
           >
             <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           </Link>
@@ -205,11 +200,10 @@ export default function Navbar() {
             href="/profile"
             aria-label="Scholar Profile"
             title={currentLang === 'EN' ? 'Scholar Profile' : 'प्रोफ़ाइल'}
-            className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${
-              pathname === '/profile'
+            className={`hidden sm:flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all ${pathname === '/profile'
                 ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-[#FFF3C4]'
                 : 'bg-[#14141C] border-[#242434] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#D4AF37]/40'
-            }`}
+              }`}
           >
             <User className="w-4 h-4" />
           </Link>
@@ -253,11 +247,10 @@ export default function Navbar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all ${
-                      isActive
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all ${isActive
                         ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-[#FFF3C4]'
                         : 'bg-[#14141C] border-[#242434] text-[#94A3B8] hover:text-[#F8FAFC]'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4 text-[#D4AF37]" />
                     <span>{currentLang === 'EN' ? item.labelEn : item.labelHi}</span>

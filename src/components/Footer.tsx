@@ -9,22 +9,22 @@ export default function Footer() {
   const { currentLang } = useApp();
 
   return (
-    <footer className="w-full bg-[#09090D] border-t border-[#242434] text-[#94A3B8] text-sm relative z-20">
+    <footer className="w-full bg-[#0B0B0F] border-t border-bronze-hairline text-parchment-muted text-sm relative z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
-          
+
           {/* Brand Info */}
           <div className="space-y-4 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#C5A059]/10 border border-[#C5A059]/30 text-[#C5A059]">
                 <Hourglass className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="font-cinzel text-lg font-bold tracking-wider text-[#F8FAFC]">
+                <span className="font-cinzel text-lg font-bold tracking-wider text-[#FAF6EE]">
                   TIMEWITNESS
                 </span>
-                <span className="text-[9px] tracking-widest text-[#D4AF37] uppercase font-mono">
-                  Historical AI Engine
+                <span className="text-[9px] tracking-widest text-[#C5A059] uppercase font-cinzel">
+                  AI Historical Archive
                 </span>
               </div>
             </Link>
