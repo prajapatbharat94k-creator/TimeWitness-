@@ -162,7 +162,7 @@ CRITICAL RULES:
     const prompt = `Interlocutor asks: "${cleanMessage}"\n\nRespond in character as ${figure.name} in ${resolvedLang.name} (${resolvedLang.nativeName}):`;
 
     const ai = new GoogleGenAI({ apiKey });
-    const CANDIDATE_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+    const CANDIDATE_MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
     let reply = '';
     let lastApiError: unknown = null;
 

@@ -393,7 +393,7 @@ Ensure strict JSON output conforming to the schema.`;
     };
 
     // ── Call Gemini with multi-model resilience (handles 503 capacity errors) ──
-    const CANDIDATE_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+    const CANDIDATE_MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
     let responseText = '';
     let lastApiError: unknown = null;
@@ -401,7 +401,7 @@ Ensure strict JSON output conforming to the schema.`;
     for (const modelName of CANDIDATE_MODELS) {
       try {
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 20000)
+          setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 12000)
         );
 
         const apiCallPromise = ai.models.generateContent({
