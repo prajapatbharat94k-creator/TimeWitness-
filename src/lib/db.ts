@@ -240,8 +240,12 @@ export interface DbProfile {
   theme: string;
 }
 
-export async function getProfile(userId: string): Promise<DbProfile> {
-  const localProf = getLocalProfile(userId);
+export async function getProfile(userId: string | null | undefined): Promise<DbProfile> {
+  const targetId = userId || 'guest';
+  const localProf = getLocalProfile(targetId);
+  if (!userId) {
+    return localProf;
+  }
   const supabase = getSupabaseClient();
   if (!supabase) return localProf;
 
@@ -257,9 +261,12 @@ export async function getProfile(userId: string): Promise<DbProfile> {
   }
 }
 
-export async function updateProfile(userId: string, updates: Partial<DbProfile>): Promise<boolean> {
+export async function updateProfile(userId: string | null | undefined, updates: Partial<DbProfile>): Promise<boolean> {
+  const targetId = userId || 'guest';
   // Save locally first
-  updateLocalProfile(userId, updates);
+  updateLocalProfile(targetId, updates);
+
+  if (!userId) return true;
 
   const supabase = getSupabaseClient();
   if (!supabase) return true;
@@ -273,10 +280,10 @@ export async function updateProfile(userId: string, updates: Partial<DbProfile>)
 }
 
 /** Favorites */
-export async function getFavorites(userId: string): Promise<ExperienceCardData[]> {
+export async function getFavorites(userId?: string | null): Promise<ExperienceCardData[]> {
   const localData = getUserFavorites(userId);
   const supabase = getSupabaseClient();
-  if (!supabase) return localData;
+  if (!supabase || !userId) return localData;
 
   try {
     const { data, error } = await supabase
@@ -302,7 +309,7 @@ export async function getFavorites(userId: string): Promise<ExperienceCardData[]
 }
 
 export async function toggleFavorite(
-  userId: string, 
+  userId: string | null | undefined, 
   experienceId: string, 
   isFavorite: boolean,
   cardData?: ExperienceCardData
@@ -319,7 +326,7 @@ export async function toggleFavorite(
   }
 
   const supabase = getSupabaseClient();
-  if (!supabase) return true;
+  if (!supabase || !userId) return true;
 
   try {
     if (isFavorite) {
@@ -335,10 +342,10 @@ export async function toggleFavorite(
 }
 
 /** Saved Experiences */
-export async function getSavedExperiences(userId: string): Promise<ExperienceCardData[]> {
+export async function getSavedExperiences(userId?: string | null): Promise<ExperienceCardData[]> {
   const localData = getUserSaved(userId);
   const supabase = getSupabaseClient();
-  if (!supabase) return localData;
+  if (!supabase || !userId) return localData;
 
   try {
     const { data, error } = await supabase
@@ -364,7 +371,7 @@ export async function getSavedExperiences(userId: string): Promise<ExperienceCar
 }
 
 export async function toggleSaved(
-  userId: string, 
+  userId: string | null | undefined, 
   experienceId: string, 
   isSaved: boolean,
   cardData?: ExperienceCardData
@@ -381,7 +388,7 @@ export async function toggleSaved(
   }
 
   const supabase = getSupabaseClient();
-  if (!supabase) return true;
+  if (!supabase || !userId) return true;
 
   try {
     if (isSaved) {
@@ -397,10 +404,10 @@ export async function toggleSaved(
 }
 
 /** History Details */
-export async function getUserHistoryDetails(userId: string): Promise<ExperienceCardData[]> {
+export async function getUserHistoryDetails(userId?: string | null): Promise<ExperienceCardData[]> {
   const localData = getUserHistory(userId);
   const supabase = getSupabaseClient();
-  if (!supabase) return localData;
+  if (!supabase || !userId) return localData;
 
   try {
     const { data, error } = await supabase
@@ -426,7 +433,7 @@ export async function getUserHistoryDetails(userId: string): Promise<ExperienceC
 }
 
 /** Fetch user activities */
-export async function getUserActivityHistory(userId: string): Promise<ActivityEntry[]> {
+export async function getUserActivityHistory(userId?: string | null): Promise<ActivityEntry[]> {
   return getUserActivities(userId);
 }
 

@@ -16,9 +16,8 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     document.title = 'Favorites Vault | TimeWitness';
-    if (!user) return;
     let isMounted = true;
-    getFavorites(user.id).then(data => {
+    getFavorites(user?.id || null).then(data => {
       if (!isMounted) return;
       setFavorites(data);
       setLoading(false);
@@ -27,10 +26,9 @@ export default function FavoritesPage() {
   }, [user]);
 
   const handleRemove = async (id: string) => {
-    if (!user) return;
     const itemToRemove = favorites.find(f => f.id === id);
     setFavorites(prev => prev.filter(f => f.id !== id));
-    await toggleFavorite(user.id, id, false, itemToRemove);
+    await toggleFavorite(user?.id || null, id, false, itemToRemove);
     toast.success('Removed from Favorites.');
   };
 

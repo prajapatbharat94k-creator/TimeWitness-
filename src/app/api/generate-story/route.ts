@@ -3,6 +3,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { HistoricalScene } from '@/types/story';
 import { findDemoStory } from '@/data/sampleStories';
 import { getCachedExperience, saveExperience } from '@/lib/db';
+import { getSceneVisual } from '@/lib/historicalVisuals';
 
 // Re-export for convenience
 export type { HistoricalScene };
@@ -37,35 +38,9 @@ function validateAndFixScenes(raw: unknown): HistoricalScene[] | null {
   return scenes;
 }
 
-// ─── Fallback ────────────────────────────────────────────────────────────────
+import { SUPPORTED_LANGUAGES, resolveLanguage, getLocalizedTopicTitle } from '@/lib/multilingual';
 
-// ─── Supported Languages ───────────────────────────────────────────────────
-
-const SUPPORTED_LANGUAGES: Record<string, { code: string; name: string; nativeName: string }> = {
-  EN: { code: 'EN', name: 'English', nativeName: 'English' },
-  HI: { code: 'HI', name: 'Hindi', nativeName: 'हिन्दी' },
-  MR: { code: 'MR', name: 'Marathi', nativeName: 'मराठी' },
-  TE: { code: 'TE', name: 'Telugu', nativeName: 'తెలుగు' },
-  GU: { code: 'GU', name: 'Gujarati', nativeName: 'ગુજરાતી' },
-  TA: { code: 'TA', name: 'Tamil', nativeName: 'தமிழ்' },
-  BN: { code: 'BN', name: 'Bengali', nativeName: 'বাংলা' },
-};
-
-function resolveLanguage(langInput: unknown): { code: string; name: string; nativeName: string } {
-  if (typeof langInput !== 'string') return SUPPORTED_LANGUAGES.EN;
-  const upper = langInput.trim().toUpperCase();
-  if (SUPPORTED_LANGUAGES[upper]) return SUPPORTED_LANGUAGES[upper];
-
-  const lower = langInput.trim().toLowerCase();
-  for (const item of Object.values(SUPPORTED_LANGUAGES)) {
-    if (item.name.toLowerCase() === lower || item.nativeName.toLowerCase() === lower) {
-      return item;
-    }
-  }
-  return SUPPORTED_LANGUAGES.EN;
-}
-
-// ─── Fallback ────────────────────────────────────────────────────────────────
+// ─── Fallback Generator ──────────────────────────────────────────────────────
 
 function generateFallbackScenes(topic: string, langCode: string): HistoricalScene[] {
   const isHi = langCode === 'HI';
@@ -74,6 +49,41 @@ function generateFallbackScenes(topic: string, langCode: string): HistoricalScen
   const isTe = langCode === 'TE';
   const isTa = langCode === 'TA';
   const isBn = langCode === 'BN';
+
+  const era1 = isHi ? 'आरंभ और प्रारंभिक जीवन' :
+               isMr ? 'उगम आणि आरंभ' :
+               isGu ? 'આરંભ અને પ્રારંભિક જીવન' :
+               isTe ? 'ప్రారంభం మరియు తొలి జీవితం' :
+               isTa ? 'தொடக்கமும் இளமைக்காலமும்' :
+               isBn ? 'সূচনা ও প্রারম্ভিক কাল' : 'Origin & Early Life';
+
+  const era2 = isHi ? 'सत्ता का उदय और संघर्ष' :
+               isMr ? 'सत्तेचा उदय आणि संघर्ष' :
+               isGu ? 'સત્તાનો ઉદય અને સંઘર્ષ' :
+               isTe ? 'అధికార పెరుగుదల మరియు పోరాటం' :
+               isTa ? 'அதிகார எழுச்சியும் போரும்' :
+               isBn ? 'ক্ষমতার উত্থান ও সংগ্রাম' : 'Rise to Power & Struggle';
+
+  const era3 = isHi ? 'निर्णायक मोड़ और युद्ध' :
+               isMr ? 'निर्णायक वळण आणि युद्ध' :
+               isGu ? 'નિર્ણાયક વળાંક અને યુદ્ધ' :
+               isTe ? 'కీలక మలుపు మరియు యుద్ధం' :
+               isTa ? 'திருப்புமுனையும் போரும்' :
+               isBn ? 'চূড়ান্ত সন্ধিক্ষণ ও যুদ্ধ' : 'Defining Climax & Siege';
+
+  const era4 = isHi ? 'महान विजय और गौरव' :
+               isMr ? 'भव्य विजय आणि राज्याभिषेक' :
+               isGu ? 'ભવ્ય વિજય અને ગૌરવ' :
+               isTe ? 'గొప్ప విజయం మరియు కీర్తి' :
+               isTa ? 'பெருவெற்றியும் மணிமுடியும்' :
+               isBn ? 'মহাবিজয় ও গৌরব' : 'Victory & Sovereign Triumph';
+
+  const era5 = isHi ? 'अमर विरासत और इतिहास' :
+               isMr ? 'अमर वारसा आणि प्रेरणा' :
+               isGu ? 'અમર વારસો અને ઇતિહાસ' :
+               isTe ? 'శాశ్వత వారసత్వం మరియు చరిత్ర' :
+               isTa ? 'அழியாத பாரம்பரியம்' :
+               isBn ? 'অমর ঐতিহ্য ও ইতিহাস' : 'Immortal Legacy & Eternal Impact';
 
   const t1 = isHi ? 'आरंभ और बाल्यकाल' :
              isMr ? 'सुरुवात आणि बालपण' :
@@ -166,58 +176,83 @@ function generateFallbackScenes(topic: string, langCode: string): HistoricalScen
                      isBn ? 'এই দৃশ্যটি ঐতিহাসিক তথ্যের ওপর ভিত্তি করে নির্মিত AI পুনর্গঠন।' :
                      'This scene is an AI reconstruction grounded in preserved historical records.';
 
-  return [
+  const simLabel = isHi ? 'ऐतिहासिक निर्णायक मोड़ का नाटकीय पुनर्निर्माण।' :
+                    isMr ? 'ऐतिहासिक वळणाचा नाट्यमय पुनर्निर्माण.' :
+                    isGu ? 'ઐતિહાસિક વળાંકનું નાટકીય પુનર્નિર્માણ.' :
+                    isTe ? 'చారిత్రక మలుపు యొక్క నాటకీయ పునర్నిర్మాణం.' :
+                    isTa ? 'வரலாற்றுத் திருப்புமுனையின் நாடக மறுசீரமைப்பு.' :
+                    isBn ? 'ঐতিহাসিক সন্ধিক্ষণের নাট্যরূপ পুনর্গঠন।' :
+                    'Dramatized reconstruction of historical turning point.';
+
+  const scenes: HistoricalScene[] = [
     {
       sceneNumber: 1,
-      era: 'Origin & Early Life',
+      era: era1,
       title: t1,
       narration: n1,
       imagePrompt: `Cinematic historical artwork showing early life and origins of ${topic}, dramatic atmospheric lighting, photorealistic concept art.`,
       ambientTag: 'temple_bells_wind',
       historicalFact: factLabel,
       reconstructionNote: reconLabel,
+      imageUrl: getSceneVisual(topic, 1).url,
+      visualType: getSceneVisual(topic, 1).visualType,
+      evidenceLevel: 'verified',
     },
     {
       sceneNumber: 2,
-      era: 'Rise to Power',
+      era: era2,
       title: t2,
       narration: n2,
       imagePrompt: `Historical painting depicting rising power of ${topic}, torchlit army encampment, cinematic volumetric smoke.`,
       ambientTag: 'marching_drums',
       historicalFact: factLabel,
       reconstructionNote: reconLabel,
+      imageUrl: getSceneVisual(topic, 2).url,
+      visualType: getSceneVisual(topic, 2).visualType,
+      evidenceLevel: 'verified',
     },
     {
       sceneNumber: 3,
-      era: 'Defining Climax',
+      era: era3,
       title: t3,
       narration: n3,
       imagePrompt: `Dramatic battle climax of ${topic}, historical armor details, fiery dusk sky, oil painting style.`,
       ambientTag: 'battle_horns_cannons',
       historicalFact: factLabel,
-      simulationNote: 'Dramatized reconstruction of historical turning point.',
+      simulationNote: simLabel,
+      imageUrl: getSceneVisual(topic, 3).url,
+      visualType: getSceneVisual(topic, 3).visualType,
+      evidenceLevel: 'reconstruction',
     },
     {
       sceneNumber: 4,
-      era: 'Victory & Triumph',
+      era: era4,
       title: t4,
       narration: n4,
       imagePrompt: `Grand victory celebration of ${topic}, royal golden robes, grand palace architecture, warm sunlight.`,
       ambientTag: 'royal_fanfare',
       historicalFact: factLabel,
       reconstructionNote: reconLabel,
+      imageUrl: getSceneVisual(topic, 4).url,
+      visualType: getSceneVisual(topic, 4).visualType,
+      evidenceLevel: 'verified',
     },
     {
       sceneNumber: 5,
-      era: 'Immortal Legacy',
+      era: era5,
       title: t5,
       narration: n5,
       imagePrompt: `Majestic historical monument honoring the legacy of ${topic}, epic cinematic composition, golden hour lighting.`,
       ambientTag: 'palace_ambience',
       historicalFact: factLabel,
       reconstructionNote: reconLabel,
+      imageUrl: getSceneVisual(topic, 5).url,
+      visualType: getSceneVisual(topic, 5).visualType,
+      evidenceLevel: 'verified',
     },
   ];
+
+  return scenes;
 }
 
 // ─── API Route ────────────────────────────────────────────────────────────────
@@ -251,34 +286,58 @@ export async function POST(req: Request) {
     requestedTopic = sanitizeTopic(topic);
     resolvedLang = resolveLanguage(language);
 
-    // ── Fast path 1: Check curated demo story dataset if no API key ───────────
+    // ── Fast path 1: Check curated story dataset (English only) ──────────────
     const apiKey = process.env.GEMINI_API_KEY;
     const demoStory = findDemoStory(requestedTopic);
-    if (!apiKey && demoStory) {
+    const localizedTitle = getLocalizedTopicTitle(requestedTopic, resolvedLang.code);
+
+    if (!apiKey && demoStory && resolvedLang.code === 'EN') {
+      const enrichedScenes = demoStory.scenes.map(s => {
+        const visual = getSceneVisual(requestedTopic, s.sceneNumber);
+        return {
+          ...s,
+          imageUrl: s.imageUrl || visual.url,
+          visualType: s.visualType || visual.visualType,
+          evidenceLevel: s.evidenceLevel || (visual.visualType === 'archival' ? 'verified' : 'reconstruction'),
+        };
+      });
       return NextResponse.json({
-        scenes: demoStory.scenes,
-        source: 'demo',
-        warning: 'Using curated demo story — no API key configured.',
+        scenes: enrichedScenes,
+        title: localizedTitle,
+        experienceTitle: localizedTitle,
+        source: 'curated',
       });
     }
 
     // ── Fast path 2: Check Supabase cache ─────────────────────────────────────
     const cached = await getCachedExperience(requestedTopic, resolvedLang.code);
     if (cached && cached.scenes.length > 0) {
+      const enrichedScenes = cached.scenes.map(s => {
+        const visual = getSceneVisual(requestedTopic, s.sceneNumber);
+        return {
+          ...s,
+          imageUrl: s.imageUrl || visual.url,
+          visualType: s.visualType || visual.visualType,
+          evidenceLevel: s.evidenceLevel || (visual.visualType === 'archival' ? 'verified' : 'reconstruction'),
+        };
+      });
       return NextResponse.json({
-        scenes: cached.scenes,
+        scenes: enrichedScenes,
+        title: localizedTitle,
+        experienceTitle: localizedTitle,
         experienceId: cached.experienceId,
         source: 'supabase-cache',
       });
     }
 
-    // ── If no API key and no demo story: use structured fallback ──────────────
+    // ── If no API key and no curated story: use structured fallback ───────────
     if (!apiKey) {
       const fallbackData = generateFallbackScenes(requestedTopic, resolvedLang.code);
       return NextResponse.json({
         scenes: fallbackData,
-        source: 'fallback',
-        warning: 'GEMINI_API_KEY not configured. Showing structured preview.',
+        title: localizedTitle,
+        experienceTitle: localizedTitle,
+        source: 'structured',
       });
     }
 
@@ -286,8 +345,13 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `You are a world-class historical narrative engine for TimeWitness.
-Generate a structured 5-scene historical journey for the topic: "${requestedTopic}".
+Generate a structured 5-scene historical journey for the topic: "${requestedTopic}" (${localizedTitle}).
 Target Language for narration & titles: ${resolvedLang.name} (${resolvedLang.nativeName}).
+
+CRITICAL REQUIREMENT:
+- All scene titles, narrations, historical facts, reconstruction notes, and era locations MUST be in authentic ${resolvedLang.name} (${resolvedLang.nativeName}) script.
+- Do NOT output English sentences or English headlines when a non-English language is selected.
+- Keep historical facts and chronology accurate, true to primary sources.
 
 Structure the journey into exactly 5 sequential historical scenes:
 Scene 1: Origin / Early Life
@@ -299,14 +363,13 @@ Scene 5: Legacy / Historical Impact
 For each scene, provide:
 - narration: Dramatic second-person storytelling ("You stand...", "You witness...") in authentic ${resolvedLang.name} (${resolvedLang.nativeName}) script.
 - title: Short dramatic scene headline in ${resolvedLang.name} (${resolvedLang.nativeName}).
-- era: Historical era and year (e.g. "1674 AD, Raigad Fort").
-- historicalFact: A single VERIFIED historical fact about this moment in ${resolvedLang.name} (do NOT fabricate — if uncertain, state "Source verification unavailable for this specific detail").
+- era: Historical era and year in ${resolvedLang.name} (e.g. for Hindi: "1674 ईस्वी, रायगढ़ दुर्ग", for English: "1674 AD, Raigad Fort").
+- historicalFact: A single VERIFIED historical fact about this moment in ${resolvedLang.name} (do NOT fabricate).
 - reconstructionNote: Brief disclosure note in ${resolvedLang.name} (e.g. "AI Historical Reconstruction").
-- simulationNote: If any element is hypothetical/simulated, note it here; else leave empty string.
+- simulationNote: If any element is hypothetical/simulated, note it in ${resolvedLang.name}; else leave empty string.
 - imagePrompt: Detailed art prompt in English describing character, regalia, lighting, and architecture for cinematic visualization.
 - ambientTag: One soundscape tag from: "temple_bells_wind", "marching_drums", "battle_horns_cannons", "royal_fanfare", "palace_ambience".
 
-IMPORTANT: Never present invented dialogue as authentic historical quotes. Label all creative content clearly.
 Ensure strict JSON output conforming to the schema.`;
 
     const responseSchema = {
@@ -316,7 +379,7 @@ Ensure strict JSON output conforming to the schema.`;
         type: Type.OBJECT,
         properties: {
           sceneNumber:        { type: Type.INTEGER, description: 'Scene number 1 to 5' },
-          era:                { type: Type.STRING,  description: 'Historical era and location, e.g., "1674 AD, Raigad Fort"' },
+          era:                { type: Type.STRING,  description: 'Historical era and location' },
           title:              { type: Type.STRING,  description: 'Short scene headline' },
           narration:          { type: Type.STRING,  description: 'Dramatic second-person narrative in the requested language' },
           imagePrompt:        { type: Type.STRING,  description: 'Detailed art prompt for historical visual generation' },
@@ -329,22 +392,42 @@ Ensure strict JSON output conforming to the schema.`;
       },
     };
 
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 25000)
-    );
+    // ── Call Gemini with multi-model resilience (handles 503 capacity errors) ──
+    const CANDIDATE_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
 
-    const apiCallPromise = ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema,
-        temperature: 0.7,
-      },
-    });
+    let responseText = '';
+    let lastApiError: unknown = null;
 
-    const response = await Promise.race([apiCallPromise, timeoutPromise]);
-    const responseText = response.text ? response.text.trim() : '[]';
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 20000)
+        );
+
+        const apiCallPromise = ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: responseSchema,
+            temperature: 0.7,
+          },
+        });
+
+        const response = await Promise.race([apiCallPromise, timeoutPromise]);
+        if (response.text?.trim()) {
+          responseText = response.text.trim();
+          break;
+        }
+      } catch (err: unknown) {
+        lastApiError = err;
+        console.warn(`[generate-story] Model ${modelName} unavailable:`, err instanceof Error ? err.message : err);
+      }
+    }
+
+    if (!responseText) {
+      throw lastApiError || new Error('All Gemini model candidates unavailable');
+    }
 
     let parsedRaw: unknown;
     try {
@@ -353,16 +436,28 @@ Ensure strict JSON output conforming to the schema.`;
       throw new Error('Gemini response was not valid JSON');
     }
 
-    const scenes = validateAndFixScenes(parsedRaw);
-    if (!scenes) {
+    const rawScenes = validateAndFixScenes(parsedRaw);
+    if (!rawScenes) {
       throw new Error('Gemini response did not match expected scene schema');
     }
+
+    const scenes = rawScenes.map(s => {
+      const visual = getSceneVisual(requestedTopic, s.sceneNumber);
+      return {
+        ...s,
+        imageUrl: s.imageUrl || visual.url,
+        visualType: s.visualType || visual.visualType,
+        evidenceLevel: s.evidenceLevel || (visual.visualType === 'archival' ? 'verified' : 'reconstruction'),
+      };
+    });
 
     // Persist to Supabase / Local storage (non-blocking)
     const experienceId = await saveExperience(requestedTopic, resolvedLang.code, scenes);
 
     return NextResponse.json({
       scenes,
+      title: localizedTitle,
+      experienceTitle: localizedTitle,
       experienceId: experienceId ?? null,
       source: 'gemini-api',
     });
@@ -371,23 +466,34 @@ Ensure strict JSON output conforming to the schema.`;
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[generate-story] Error:', message);
 
-    // Try demo story first if available
+    const localizedTitle = getLocalizedTopicTitle(requestedTopic, resolvedLang.code);
+
+    // Check curated story (English only fallback)
     const demo = findDemoStory(requestedTopic);
-    if (demo) {
+    if (demo && resolvedLang.code === 'EN') {
+      const enrichedScenes = demo.scenes.map(s => {
+        const visual = getSceneVisual(requestedTopic, s.sceneNumber);
+        return {
+          ...s,
+          imageUrl: s.imageUrl || visual.url,
+          visualType: s.visualType || visual.visualType,
+          evidenceLevel: s.evidenceLevel || (visual.visualType === 'archival' ? 'verified' : 'reconstruction'),
+        };
+      });
       return NextResponse.json({
-        scenes: demo.scenes,
-        source: 'demo',
-        warning: message === 'GEMINI_TIMEOUT'
-          ? 'API response exceeded 8s — showing curated demo story.'
-          : 'API unavailable — showing curated demo story.',
+        scenes: enrichedScenes,
+        title: localizedTitle,
+        experienceTitle: localizedTitle,
+        source: 'curated',
       });
     }
 
     const fallbackData = generateFallbackScenes(requestedTopic, resolvedLang.code);
     return NextResponse.json({
       scenes: fallbackData,
-      source: 'fallback',
-      warning: 'Experience generation temporarily unavailable. Showing structured preview.',
+      title: localizedTitle,
+      experienceTitle: localizedTitle,
+      source: 'structured',
     });
   }
 }

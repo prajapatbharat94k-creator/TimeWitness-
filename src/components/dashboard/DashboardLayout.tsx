@@ -44,12 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Protected route logic
-  React.useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/auth/signin');
-    }
-  }, [user, loading, router]);
+  // Guest users are allowed! We do not redirect away to /auth/signin.
 
   const navItems = [
     { href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Overview' },
@@ -65,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/profile', icon: <UserIcon className="w-5 h-5" />, label: 'Profile' },
   ];
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0E] flex flex-col items-center justify-center gap-3">
         <Hourglass className="w-9 h-9 text-[#D4AF37] animate-pulse-slow" />
@@ -79,7 +74,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/');
   };
 
-  const displayName = user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Historian');
+  const isGuest = !user;
+  const displayName = user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Guest Historian');
 
   return (
     <div className="min-h-screen bg-[#0A0A0E] text-[#94A3B8] flex flex-col md:flex-row antialiased overflow-x-hidden">
@@ -140,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-[#F8FAFC] truncate">{displayName}</p>
-                  <p className="text-[10px] text-[#64748B] truncate">{user.email}</p>
+                  <p className="text-[10px] text-[#64748B] truncate">{user?.email || 'Local Archives'}</p>
                 </div>
               </div>
 
@@ -169,15 +165,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ))}
               </div>
 
-              {/* Drawer Sign Out */}
+              {/* Drawer Sign Out / Sign In */}
               <div className="p-4 border-t border-[#242434]">
-                <button 
-                  onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
+                {user ? (
+                  <button 
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                ) : (
+                  <Link 
+                    href="/auth/signin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm bg-[#D4AF37] hover:bg-[#F3E5AB] text-[#0A0A0E] transition-all duration-200 shadow-gold-glow"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    <span>Sign In to Sync</span>
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>
@@ -206,7 +213,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-[#F8FAFC] truncate">{displayName}</p>
-              <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+              <p className="text-[11px] text-[#64748B] truncate">{user?.email || 'Local Archives'}</p>
             </div>
           </div>
         </div>
@@ -221,7 +228,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </div>
 
-        {/* Bottom Items: Settings, Profile, Sign Out */}
+        {/* Bottom Items: Settings, Profile, Sign In / Sign Out */}
         <div className="p-4 border-t border-[#242434] flex flex-col gap-1.5">
           <div className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider px-4 mb-1">
             Settings & Profile
@@ -230,19 +237,48 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavItem key={item.href} {...item} isActive={pathname === item.href} />
           ))}
           
-          <button 
-            onClick={handleSignOut}
-            className="flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm text-[#64748B] hover:bg-[#1B1B26] hover:text-red-400 transition-all duration-200 mt-1 text-left"
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Sign Out</span>
-          </button>
+          {user ? (
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm text-[#64748B] hover:bg-[#1B1B26] hover:text-red-400 transition-all duration-200 mt-1 text-left"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Sign Out</span>
+            </button>
+          ) : (
+            <Link 
+              href="/auth/signin"
+              className="flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm text-[#D4AF37] hover:bg-[#D4AF37]/15 transition-all duration-200 mt-1"
+            >
+              <UserIcon className="w-5 h-5" />
+              <span>Sign In / Register</span>
+            </Link>
+          )}
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 bg-[#0A0A0E] overflow-x-hidden min-h-screen">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          {isGuest && (
+            <div className="mb-6 p-4 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] font-bold text-xs tracking-wider">
+                  GUEST
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#F8FAFC]">Guest Historian Mode</p>
+                  <p className="text-xs text-[#94A3B8]">Your saved archives, favorites, and history are preserved locally in this browser.</p>
+                </div>
+              </div>
+              <Link
+                href="/auth/signin"
+                className="px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#F3E5AB] text-[#0A0A0E] text-xs font-bold transition-all shadow-gold-glow flex-shrink-0"
+              >
+                Sign In to Sync
+              </Link>
+            </div>
+          )}
           {children}
         </div>
       </main>

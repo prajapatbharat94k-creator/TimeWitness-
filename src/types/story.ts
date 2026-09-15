@@ -5,10 +5,16 @@ export interface HistoricalScene {
   narration: string;
   imagePrompt: string;
   ambientTag: string;
+  // Visual metadata
+  imageUrl?: string;
+  visualType?: 'archival' | 'reconstruction';
   // Evidence classification fields
   historicalFact?: string;
   reconstructionNote?: string;
   simulationNote?: string;
+  evidenceLevel?: 'verified' | 'supported' | 'uncertain' | 'reconstruction';
+  location?: string;
+  date?: string;
 }
 
 export interface GenerateStoryRequest {
@@ -18,7 +24,9 @@ export interface GenerateStoryRequest {
 
 export interface GenerateStoryResponse {
   scenes: HistoricalScene[];
-  source: 'gemini-api' | 'fallback' | 'demo' | 'supabase-cache';
+  title?: string;
+  experienceTitle?: string;
+  source: 'gemini-api' | 'fallback' | 'demo' | 'supabase-cache' | 'curated' | 'structured';
   experienceId?: string | null;
   warning?: string;
   error?: string;

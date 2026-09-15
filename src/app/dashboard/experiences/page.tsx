@@ -15,9 +15,8 @@ export default function MyExperiencesPage() {
 
   useEffect(() => {
     document.title = 'My Experiences | TimeWitness';
-    if (!user) return;
     let isMounted = true;
-    getUserHistoryDetails(user.id).then(data => {
+    getUserHistoryDetails(user?.id || null).then(data => {
       if (!isMounted) return;
       setExperiences(data);
       setLoading(false);

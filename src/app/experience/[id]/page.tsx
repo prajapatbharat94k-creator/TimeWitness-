@@ -29,6 +29,7 @@ export default function ExperiencePage() {
   const [experienceId, setExperienceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isTalkModalOpen, setIsTalkModalOpen] = useState(false);
+  const [talkHistoricalContext, setTalkHistoricalContext] = useState<string | undefined>(undefined);
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function ExperiencePage() {
         const res = await fetch('/api/generate-story', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic: resolvedTopic, language: languageInfo.nativeName }),
+          body: JSON.stringify({ topic: resolvedTopic, language: languageInfo.code }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -59,12 +60,18 @@ export default function ExperiencePage() {
     }
 
     loadStory();
-  }, [id, languageInfo.nativeName, toast]);
+  }, [id, languageInfo.code, toast]);
+
+  const handleOpenTalkToHistory = (figureName?: string, context?: string) => {
+    if (figureName) setTopic(figureName);
+    setTalkHistoricalContext(context);
+    setIsTalkModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-[#0D0D11] text-[#94A3B8] selection:bg-[#D4AF37]/30 selection:text-[#FFF3C4]">
       <Navbar 
-        onOpenTalkToHistory={() => setIsTalkModalOpen(true)}
+        onOpenTalkToHistory={() => handleOpenTalkToHistory()}
         isMuted={isMuted}
         onToggleMute={() => setIsMuted(m => !m)}
       />
@@ -75,7 +82,7 @@ export default function ExperiencePage() {
           scenes={scenes}
           experienceId={experienceId}
           isLoading={isLoading}
-          onOpenTalkToHistory={() => setIsTalkModalOpen(true)}
+          onOpenTalkToHistory={handleOpenTalkToHistory}
           isMuted={isMuted}
           onToggleMute={() => setIsMuted(m => !m)}
           onToastSuccess={toast.success}
@@ -87,6 +94,7 @@ export default function ExperiencePage() {
         isOpen={isTalkModalOpen}
         onClose={() => setIsTalkModalOpen(false)}
         defaultFigure={topic}
+        historicalContext={talkHistoricalContext}
       />
     </div>
   );

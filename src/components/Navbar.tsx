@@ -249,6 +249,13 @@ export default function Navbar({ onOpenTalkToHistory, isMuted: propIsMuted, onTo
             ) : (
               <div className="flex items-center gap-2">
                 <Link
+                  href="/dashboard"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#D4AF37] hover:bg-[#14141C] border border-transparent hover:border-[#242434] transition-all"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
                   href="/auth/signin"
                   className="px-3 sm:px-4 py-2 rounded-xl bg-[#D4AF37]/10 hover:bg-[#D4AF37] border border-[#D4AF37]/40 text-[#D4AF37] hover:text-[#0A0A0E] transition-all text-xs sm:text-sm font-bold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
                 >

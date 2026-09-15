@@ -5,7 +5,7 @@ import TalkToHistoryModal from '@/components/TalkToHistoryModal';
 
 interface TalkToHistoryContextType {
   isOpen: boolean;
-  openTalkToHistory: (topic?: string, figureId?: string) => void;
+  openTalkToHistory: (topic?: string, figureId?: string, historicalContext?: string) => void;
   closeTalkToHistory: () => void;
 }
 
@@ -19,10 +19,12 @@ export function TalkToHistoryProvider({ children }: { children: React.ReactNode 
   const [isOpen, setIsOpen] = useState(false);
   const [topic, setTopic] = useState<string | undefined>(undefined);
   const [figureId, setFigureId] = useState<string | undefined>(undefined);
+  const [context, setContext] = useState<string | undefined>(undefined);
 
-  const openTalkToHistory = (t?: string, fId?: string) => {
+  const openTalkToHistory = (t?: string, fId?: string, hCtx?: string) => {
     setTopic(t);
     setFigureId(fId);
+    setContext(hCtx);
     setIsOpen(true);
   };
 
@@ -38,6 +40,7 @@ export function TalkToHistoryProvider({ children }: { children: React.ReactNode 
         onClose={closeTalkToHistory}
         initialTopic={topic}
         initialFigureId={figureId}
+        historicalContext={context}
       />
     </TalkToHistoryContext.Provider>
   );

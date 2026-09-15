@@ -14,9 +14,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     document.title = 'Recently Viewed History | TimeWitness';
-    if (!user) return;
     let isMounted = true;
-    getUserHistoryDetails(user.id).then(data => {
+    getUserHistoryDetails(user?.id || null).then(data => {
       if (!isMounted) return;
       // Sort newest first by last_viewed_at or added_at
       const sorted = [...data].sort((a, b) => {

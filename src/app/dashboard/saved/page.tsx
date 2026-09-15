@@ -16,9 +16,8 @@ export default function SavedPage() {
 
   useEffect(() => {
     document.title = 'Saved Experiences | TimeWitness';
-    if (!user) return;
     let isMounted = true;
-    getSavedExperiences(user.id).then(data => {
+    getSavedExperiences(user?.id || null).then(data => {
       if (!isMounted) return;
       setSaved(data);
       setLoading(false);
@@ -27,10 +26,9 @@ export default function SavedPage() {
   }, [user]);
 
   const handleRemove = async (id: string) => {
-    if (!user) return;
     const itemToRemove = saved.find(s => s.id === id);
     setSaved(prev => prev.filter(s => s.id !== id));
-    await toggleSaved(user.id, id, false, itemToRemove);
+    await toggleSaved(user?.id || null, id, false, itemToRemove);
     toast.success('Removed from Saved Vault.');
   };
 

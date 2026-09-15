@@ -9,13 +9,10 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = false;
-      config.infrastructureLogging = {
-        level: 'error',
-      };
-    }
+  webpack: (config) => {
+    config.infrastructureLogging = {
+      level: 'error',
+    };
     return config;
   },
 };

@@ -12,10 +12,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://timewitness.ai'),
   title: {
-    default: 'TimeWitness | AI-Powered Cinematic Historical Time Machine',
+    default: 'TimeWitness — Witness History As It Happened',
     template: '%s | TimeWitness',
   },
-  description: 'Relive historical moments with verified primary source citations, multi-lingual audio narration, atmospheric soundscapes, and AI evidence reconstructions.',
+  description: 'AI-Powered Historical Experience & Reconstruction Platform. Step into primary-source grounded historical moments across civilisations.',
   keywords: [
     'History', 'AI Historical Research', 'Time Machine', 'Shivaji Maharaj', 
     'Napoleon', 'Rani Lakshmibai', '1857 Revolution', 'Ancient History', 

@@ -48,18 +48,17 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     document.title = 'Historian Portal & Overview | TimeWitness';
-    if (!user) return;
-    
     let isMounted = true;
 
     async function loadData() {
       try {
+        const userId = user ? user.id : null;
         const [prof, hist, savedList, favList, acts] = await Promise.all([
-          getProfile(user!.id),
-          getUserHistoryDetails(user!.id),
-          getSavedExperiences(user!.id),
-          getFavorites(user!.id),
-          getUserActivityHistory(user!.id),
+          getProfile(userId),
+          getUserHistoryDetails(userId),
+          getSavedExperiences(userId),
+          getFavorites(userId),
+          getUserActivityHistory(userId),
         ]);
 
         if (!isMounted) return;

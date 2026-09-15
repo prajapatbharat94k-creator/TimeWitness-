@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ToastProvider';
 import { LANGUAGES, LanguageCode } from '@/lib/translations';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
@@ -25,9 +26,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     document.title = 'Settings & Preferences | TimeWitness';
-    if (!user) return;
     let isMounted = true;
-    getProfile(user.id).then(data => {
+    getProfile(user ? user.id : null).then(data => {
       if (!isMounted) return;
       setProfile(data);
       setLoading(false);
@@ -36,7 +36,7 @@ export default function SettingsPage() {
   }, [user]);
 
   const handleChange = async (key: keyof DbProfile, value: any) => {
-    if (!user || !profile) return;
+    if (!profile) return;
     
     // Optimistic update
     const updated = { ...profile, [key]: value };
@@ -50,7 +50,7 @@ export default function SettingsPage() {
       }
     }
 
-    const success = await updateProfile(user.id, { [key]: value });
+    const success = await updateProfile(user?.id, { [key]: value });
     if (!success) {
       toast.error('Failed to save preference.');
     } else {
@@ -76,7 +76,7 @@ export default function SettingsPage() {
     router.push('/');
   };
 
-  if (loading || !user || !profile) {
+  if (loading || !profile) {
     return (
       <DashboardLayout>
         <div className="h-96 flex flex-col items-center justify-center gap-3">
@@ -242,37 +242,57 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-4 mt-6">
-            {/* Sign Out */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-[#0A0A0E] border border-[#242434] rounded-2xl gap-4">
-              <div>
-                <div className="font-semibold text-sm sm:text-base text-[#F8FAFC]">Sign Out</div>
-                <div className="text-xs text-[#94A3B8] mt-0.5">End your current session across this browser.</div>
-              </div>
-              <button 
-                onClick={handleSignOut}
-                className="px-5 py-2.5 rounded-xl bg-[#1B1B26] hover:bg-[#D4AF37]/20 border border-[#242434] hover:border-[#D4AF37]/50 text-[#F8FAFC] hover:text-[#D4AF37] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-            
-            {/* Delete Account */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-[#0A0A0E] border border-red-900/30 rounded-2xl gap-4">
-              <div>
-                <div className="font-semibold text-sm sm:text-base text-red-400">Delete Account</div>
-                <div className="text-xs text-[#94A3B8] mt-0.5">
-                  Permanent removal of personal experiences, history, and preferences.
+            {user ? (
+              <>
+                {/* Sign Out */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-[#0A0A0E] border border-[#242434] rounded-2xl gap-4">
+                  <div>
+                    <div className="font-semibold text-sm sm:text-base text-[#F8FAFC]">Sign Out</div>
+                    <div className="text-xs text-[#94A3B8] mt-0.5">End your current session across this browser.</div>
+                  </div>
+                  <button 
+                    onClick={handleSignOut}
+                    className="px-5 py-2.5 rounded-xl bg-[#1B1B26] hover:bg-[#D4AF37]/20 border border-[#242434] hover:border-[#D4AF37]/50 text-[#F8FAFC] hover:text-[#D4AF37] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
                 </div>
+                
+                {/* Delete Account */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-[#0A0A0E] border border-red-900/30 rounded-2xl gap-4">
+                  <div>
+                    <div className="font-semibold text-sm sm:text-base text-red-400">Delete Account</div>
+                    <div className="text-xs text-[#94A3B8] mt-0.5">
+                      Permanent removal of personal experiences, history, and preferences.
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="px-5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete Account</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-[#0A0A0E] border border-[#242434] rounded-2xl gap-4">
+                <div>
+                  <div className="font-semibold text-sm sm:text-base text-[#F8FAFC]">Guest Session</div>
+                  <div className="text-xs text-[#94A3B8] mt-0.5">
+                    Your preferences and history are preserved locally on this device. Sign in or create an account to synchronize across devices.
+                  </div>
+                </div>
+                <Link 
+                  href="/auth/signin"
+                  className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#FFF3C4] text-[#0A0A0E] font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto shrink-0"
+                >
+                  <LogOut className="w-4 h-4 rotate-180" />
+                  <span>Sign In</span>
+                </Link>
               </div>
-              <button 
-                onClick={handleDeleteAccount}
-                className="px-5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete Account</span>
-              </button>
-            </div>
+            )}
           </div>
         </section>
 

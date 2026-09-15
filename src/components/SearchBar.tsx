@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Sparkles, MapPin, Clock, ScrollText, ArrowRight } from 'lucide-react';
+import { Search, Sparkles, MapPin, Clock, ScrollText, ArrowRight, Swords, Crown, Flag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SearchBarProps {
@@ -17,51 +17,82 @@ export default function SearchBar({ onSearch, activeQuery }: SearchBarProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      onSearch(query);
+      onSearch(query.trim());
     }
   };
 
-  const sampleTags = [
-    { 
-      labelEn: 'Coronation of Shivaji Maharaj, 1674',
-      labelLocal: currentLang === 'HI' ? 'शिवाजी महाराज का राज्याभिषेक, 1674' :
-                  currentLang === 'MR' ? 'शिवाजी महाराजांचा राज्याभिषेक, 1674' :
-                  currentLang === 'TE' ? 'శివాజీ మహారాజ్ పట్టాభిషేకం, 1674' :
-                  currentLang === 'GU' ? 'શિવાજી મહારાજનો રાજ્યાભિષેક, 1674' :
-                  currentLang === 'TA' ? 'சிவாஜி மகாராஜா முடிசூட்டு விழா, 1674' :
-                  currentLang === 'BN' ? 'শিবাজী মহারাজের রাজ্যাভিষেক, 1674' : 'Coronation of Shivaji Maharaj, 1674',
-      icon: <Clock className="w-3 h-3" /> 
+  // The 6 exact required example chips (Requirement 12)
+  const sampleChips = [
+    {
+      query: 'Shivaji Maharaj',
+      label: currentLang === 'HI' ? 'शिवाजी महाराज' :
+             currentLang === 'MR' ? 'शिवाजी महाराज' :
+             currentLang === 'TE' ? 'శివాజీ మహారాజ్' :
+             currentLang === 'GU' ? 'શિવાજી મહારાજ' :
+             currentLang === 'TA' ? 'சிவாஜி மகாராஜா' :
+             currentLang === 'BN' ? 'শিবাজী মহারাজ' : 'Shivaji Maharaj',
+      icon: <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />,
     },
-    { 
-      labelEn: 'Battle of Waterloo, 1815',
-      labelLocal: currentLang === 'HI' ? 'वाटरलू का युद्ध, 1815' :
-                  currentLang === 'MR' ? 'वॉटरलूची लढाई, 1815' :
-                  currentLang === 'TE' ? 'వాటర్లూ యుద్ధం, 1815' :
-                  currentLang === 'GU' ? 'વોટરલૂનું યુદ્ધ, 1815' :
-                  currentLang === 'TA' ? 'வாட்டர்லூ போர், 1815' :
-                  currentLang === 'BN' ? 'ওয়াটারলু যুদ্ধ, 1815' : 'Battle of Waterloo, 1815',
-      icon: <MapPin className="w-3 h-3" /> 
+    {
+      query: 'Rani Lakshmibai',
+      label: currentLang === 'HI' ? 'रानी लक्ष्मीबाई' :
+             currentLang === 'MR' ? 'राणी लक्ष्मीबाई' :
+             currentLang === 'TE' ? 'రాణీ లక్ష్మీబాయి' :
+             currentLang === 'GU' ? 'રાણી લક્ષ્મીબાઈ' :
+             currentLang === 'TA' ? 'ராணி லட்சுமிபாய்' :
+             currentLang === 'BN' ? 'রানী লক্ষ্মীবাঈ' : 'Rani Lakshmibai',
+      icon: <Swords className="w-3.5 h-3.5 text-[#D4AF37]" />,
     },
-    { 
-      labelEn: 'Apollo 11 Moon Landing, 1969',
-      labelLocal: currentLang === 'HI' ? 'अपोलो 11 मून लैंडिंग, 1969' :
-                  currentLang === 'MR' ? 'अपोलो 11 चंद्र मोहीम, 1969' :
-                  currentLang === 'TE' ? 'అపోలో 11 మూన్ ల్యాండింగ్, 1969' :
-                  currentLang === 'GU' ? 'અપોલો 11 ચંદ્ર ઉતરાણ, 1969' :
-                  currentLang === 'TA' ? 'அப்பல்லோ 11 நிலவில் தரையிறக்கம், 1969' :
-                  currentLang === 'BN' ? 'অ্যাপোলো ১১ চাঁদ অবতরণ, 1969' : 'Apollo 11 Moon Landing, 1969',
-      icon: <Sparkles className="w-3 h-3" /> 
+    {
+      query: 'Napoleon at Waterloo',
+      label: currentLang === 'HI' ? 'नेपोलियन (वाटरलू)' :
+             currentLang === 'MR' ? 'नेपोलियन (वॉटरलू)' :
+             currentLang === 'TE' ? 'నెపోలియన్ (వాటర్లూ)' :
+             currentLang === 'GU' ? 'નેપોલિયન (વોટરલૂ)' :
+             currentLang === 'TA' ? 'நெப்போலியன் (வாட்டர்லூ)' :
+             currentLang === 'BN' ? 'নেপোলিয়ন (ওয়াটারলু)' : 'Napoleon at Waterloo',
+      icon: <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" />,
+    },
+    {
+      query: 'Cleopatra',
+      label: currentLang === 'HI' ? 'क्लियोपेट्रा' :
+             currentLang === 'MR' ? 'क्लियोपॅत्रा' :
+             currentLang === 'TE' ? 'క్లియోపాత్రా' :
+             currentLang === 'GU' ? 'ક્લિયોપેટ્રા' :
+             currentLang === 'TA' ? 'கிளியோபாட்ரா' :
+             currentLang === 'BN' ? 'ক্লিওপেট্রা' : 'Cleopatra',
+      icon: <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />,
+    },
+    {
+      query: 'French Revolution',
+      label: currentLang === 'HI' ? 'फ्रांसीसी क्रांति' :
+             currentLang === 'MR' ? 'फ्रेंच क्रांती' :
+             currentLang === 'TE' ? 'ఫ్రెంచ్ విప్లవం' :
+             currentLang === 'GU' ? 'ફ્રેન્ચ ક્રાંતિ' :
+             currentLang === 'TA' ? 'பிரெஞ்சுப் புரட்சி' :
+             currentLang === 'BN' ? 'ফরাসি বিপ্লব' : 'French Revolution',
+      icon: <Flag className="w-3.5 h-3.5 text-[#D4AF37]" />,
+    },
+    {
+      query: 'Apollo 11',
+      label: currentLang === 'HI' ? 'अपोलो 11' :
+             currentLang === 'MR' ? 'अपोलो 11' :
+             currentLang === 'TE' ? 'అపోలో 11' :
+             currentLang === 'GU' ? 'અપોલો 11' :
+             currentLang === 'TA' ? 'அப்பல்லோ 11' :
+             currentLang === 'BN' ? 'অ্যাপোলো ১১' : 'Apollo 11',
+      icon: <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />,
     },
   ];
 
   return (
-    <section id="search-section" className="w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-20 -mt-8 sm:-mt-12 mb-12 sm:mb-20">
+    <section id="search-section" className="w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-20 -mt-6 sm:-mt-8 mb-12 sm:mb-16">
       
       {/* Main Search Container */}
-      <div className={`relative rounded-2xl sm:rounded-3xl p-1.5 transition-all duration-500 ${
+      <div className={`relative rounded-2xl sm:rounded-3xl p-1.5 transition-all duration-300 ${
         isFocused 
-          ? 'bg-gradient-to-r from-[#D4AF37]/40 via-[#242434] to-[#D4AF37]/40 shadow-[0_0_40px_rgba(212,175,55,0.15)] scale-[1.01]' 
-          : 'bg-[#242434] hover:bg-[#2A2A3C] shadow-2xl'
+          ? 'bg-gradient-to-r from-[#D4AF37]/50 via-[#242434] to-[#D4AF37]/50 shadow-[0_0_35px_rgba(212,175,55,0.2)] scale-[1.01]' 
+          : 'bg-[#1B1B26] hover:bg-[#242434] shadow-2xl'
       }`}>
         <form 
           onSubmit={handleSubmit}
@@ -77,8 +108,8 @@ export default function SearchBar({ onSearch, activeQuery }: SearchBarProps) {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder={t('searchPlaceholder')}
-            className="w-full px-3 sm:px-4 py-4 sm:py-5 lg:py-6 bg-transparent text-sm sm:text-base lg:text-lg text-[#F8FAFC] placeholder:text-[#475569] focus:outline-none font-medium"
+            placeholder="Search a person, event, civilization or place..."
+            className="w-full px-3 sm:px-4 py-4 sm:py-5 lg:py-5 bg-transparent text-sm sm:text-base lg:text-lg text-[#F8FAFC] placeholder:text-[#64748B] focus:outline-none font-medium"
             autoComplete="off"
           />
 
@@ -99,42 +130,40 @@ export default function SearchBar({ onSearch, activeQuery }: SearchBarProps) {
             <button
               type="submit"
               disabled={!query.trim()}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B89220] hover:from-[#FFF3C4] hover:to-[#D4AF37] text-[#0A0A0E] font-bold text-xs sm:text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B89220] hover:from-[#FFF3C4] hover:to-[#D4AF37] text-[#0A0A0E] font-bold text-xs sm:text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-gold-glow"
             >
-              <span className="hidden xs:inline">{t('searchButton')}</span>
+              <span className="hidden xs:inline">Witness</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </form>
       </div>
 
-      {/* Suggested Pills */}
-      <div className="mt-6 sm:mt-8">
-        <div className="flex flex-col items-center justify-center gap-2 mb-4">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#64748B] flex items-center gap-2">
+      {/* Example Chips (Requirement 12) */}
+      <div className="mt-5 sm:mt-6">
+        <div className="flex flex-col items-center justify-center gap-1.5 mb-3">
+          <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-[#64748B] flex items-center gap-2">
             <ScrollText className="w-3.5 h-3.5 text-[#D4AF37]" />
-            {t('popularCoordinates')}
+            <span>Witness Example Coordinates:</span>
           </span>
-          <span className="text-[10px] text-[#475569]">{t('clickPill')}</span>
         </div>
         
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {sampleTags.map((tag, idx) => {
-            const label = tag.labelLocal;
-            const isActive = activeQuery === tag.labelEn;
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+          {sampleChips.map((chip, idx) => {
+            const isActive = activeQuery.toLowerCase().includes(chip.query.toLowerCase());
             
             return (
               <button
                 key={idx}
-                onClick={() => onSearch(tag.labelEn)} // Always pass English query to backend for consistency unless requested otherwise
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                onClick={() => onSearch(chip.query)}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition-all ${
                   isActive 
-                    ? 'bg-[#D4AF37] text-[#0A0A0E] shadow-gold-glow' 
+                    ? 'bg-[#D4AF37] text-[#0A0A0E] font-bold shadow-gold-glow' 
                     : 'bg-[#14141C] border border-[#242434] text-[#94A3B8] hover:border-[#D4AF37]/50 hover:text-[#D4AF37] hover:bg-[#1B1B26]'
                 }`}
               >
-                {tag.icon}
-                {label}
+                {chip.icon}
+                <span>{chip.label}</span>
               </button>
             );
           })}
